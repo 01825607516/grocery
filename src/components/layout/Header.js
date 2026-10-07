@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import HeaderToggles from "./HeaderToggles";
@@ -42,7 +42,7 @@ function IconButton({ path, label, count, onClick }) {
   return (
     <button onClick={onClick} aria-label={`${label}${count ? ` (${count})` : ""}`} className="relative flex shrink-0 flex-col items-center text-primary">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
-      <span className="hidden font-display text-xs italic md:block">{label}</span>
+      <span className="hidden font-display text-xs italic md:block lg:hidden xl:block">{label}</span>
       {count > 0 && <b className="absolute -right-2 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] text-white">{count}</b>}
     </button>
   );
@@ -68,7 +68,7 @@ function NavLinks({ active: spy, className = "" }) {
     if (ul && li && ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: li.offsetLeft - (ul.clientWidth - li.clientWidth) / 2, behavior: "smooth" });
   }, [active]);
   return (
-    <ul ref={ref} className={`no-scrollbar flex items-center gap-5 font-display text-[15px] tracking-wide xl:gap-7 ${className}`}>
+    <ul ref={ref} className={`no-scrollbar flex items-center gap-5 font-display text-[15px] tracking-wide lg:gap-4 lg:text-sm xl:gap-7 xl:text-[15px] ${className}`}>
       {NAV.map((n) => (
         <li key={n.id} className="shrink-0">
           <a href={`${onHome ? "" : "/"}#${n.id}`} aria-current={active === n.id ? "true" : undefined}
@@ -114,16 +114,16 @@ export default function Header() {
           <a href="tel:0949324782" className={`hidden whitespace-nowrap font-medium tracking-wide text-accent xl:block ${sale ? "" : "ml-auto"}`}>Call 09 4932 4782</a>
         </div>
       </div>
-      <div className="container-x flex items-center gap-3 py-3.5 md:gap-5">
+      <div className="container-x flex items-center gap-3 py-3.5 md:gap-5 lg:gap-4">
         <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary">Freshly<span className="text-accent">.</span></a>
-        <nav aria-label="Page sections" className="mx-auto hidden xl:block"><NavLinks active={active} /></nav>
-        <span className="ml-auto flex items-center gap-3 md:gap-5 xl:ml-0"><IconButton path={HEART} label="Wishlist" count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
+        <nav aria-label="Page sections" className="mx-auto hidden lg:block"><NavLinks active={active} /></nav>
+        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><IconButton path={HEART} label="Wishlist" count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
         <IconButton path={BAG} label="Cart" count={count} onClick={() => setDrawerOpen(true)} />
         <HeaderToggles />
         <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : "Login"} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} /></span>
       </div>
       {/* phones / small tablets: second row, swipeable */}
-      <nav aria-label="Page sections" className="border-t border-accent/20 xl:hidden">
+      <nav aria-label="Page sections" className="border-t border-accent/20 lg:hidden">
         <NavLinks active={active} className="container-x justify-start overflow-x-auto py-1" />
       </nav>
       {saleOpen && sale && <CollectionModal open onClose={() => setSaleOpen(false)} title={sale.title} products={products.filter((p) => sale.cats.includes(p.category))} />}

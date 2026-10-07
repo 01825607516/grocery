@@ -1,0 +1,194 @@
+{
+ "/images/banner-c1.jpg": {
+  "by": "David Todd McCarty",
+  "link": "https://unsplash.com/@davidtoddmccarty?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/banner-c2.jpg": {
+  "by": "Aleksandrs Karevs",
+  "link": "https://unsplash.com/@wowcontly?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/banner-c3.jpg": {
+  "by": "Quin Engle",
+  "link": "https://unsplash.com/@twistsandzests?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/banner-c4.jpg": {
+  "by": "Denny Müller",
+  "link": "https://unsplash.com/@redaquamedia?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-veg.jpg": {
+  "by": "Julian Steenbergen",
+  "link": "https://unsplash.com/@mamanofficial?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-fruits.jpg": {
+  "by": "Shamblen Studios",
+  "link": "https://unsplash.com/@shamblenstudios?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-meat.jpg": {
+  "by": "Sudharma Putra",
+  "link": "https://unsplash.com/@sudharmaputra?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-dairy.jpg": {
+  "by": "personalgraphic.com",
+  "link": "https://unsplash.com/@personal_graphic?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-bakery.jpg": {
+  "by": "Siebe Warmoeskerken",
+  "link": "https://unsplash.com/@devetpan?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-snacks.jpg": {
+  "by": "Pavel Kalenik",
+  "link": "https://unsplash.com/@pavel_kalenik?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-drinks.jpg": {
+  "by": "Dose Juice",
+  "link": "https://unsplash.com/@dosejuice?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-grains.jpg": {
+  "by": "Mockup Graphics",
+  "link": "https://unsplash.com/@mockupgraphics?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-frozen.jpg": {
+  "by": "Ben A",
+  "link": "https://unsplash.com/@antoneba?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-beauty.jpg": {
+  "by": "Reuben Mansell",
+  "link": "https://unsplash.com/@reubenmansell?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-home.jpg": {
+  "by": "Sophie",
+  "link": "https://unsplash.com/@sophiebarrowauthor?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-spices.jpg": {
+  "by": "Timothy Newman",
+  "link": "https://unsplash.com/@newmanphotog?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-noodles.jpg": {
+  "by": "Mahmoud Fawzy",
+  "link": "https://unsplash.com/@mahmoud_fawzy100?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-sweets.jpg": {
+  "by": "amit singh",
+  "link": "https://unsplash.com/@amit198?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-breakfast.jpg": {
+  "by": "Gözde Bozoğlu",
+  "link": "https://unsplash.com/@gozdeb?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-baby.jpg": {
+  "by": "Natracare",
+  "link": "https://unsplash.com/@natracare?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-pet.jpg": {
+  "by": "Anusha Barwa",
+  "link": "https://unsplash.com/@anushabarwa?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-health.jpg": {
+  "by": "Supliful - Supplements On Demand",
+  "link": "https://unsplash.com/@supliful?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cat-hygiene.jpg": {
+  "by": "The Humble Co.",
+  "link": "https://unsplash.com/@thehumbleco?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/tomato.jpg": {
+  "by": "Mockup Graphics",
+  "link": "https://unsplash.com/@mockupgraphics?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/spinach-bunch.jpg": {
+  "by": "Elianna Friedman",
+  "link": "https://unsplash.com/@fruitorvegetable?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/brinjal.jpg": {
+  "by": "nilufar nattaq",
+  "link": "https://unsplash.com/@nillufar?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/red-onion.jpg": {
+  "by": "vivek sharma",
+  "link": "https://unsplash.com/@vkysharma?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/cauliflower.jpg": {
+  "by": "Mustafa akın",
+  "link": "https://unsplash.com/@msaimakin?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/sweet-pumpkin.jpg": {
+  "by": "personalgraphic.com",
+  "link": "https://unsplash.com/@personal_graphic?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/banana-dozen.jpg": {
+  "by": "Giorgio Trovato",
+  "link": "https://unsplash.com/@giorgiotrovato?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/black-grapes.jpg": {
+  "by": "Anh Nguyen",
+  "link": "https://unsplash.com/@pwign?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/papaya.jpg": {
+  "by": "Jason Grant",
+  "link": "https://unsplash.com/@jgrant1?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/pomegranate.jpg": {
+  "by": "Sina Katirachi",
+  "link": "https://unsplash.com/@sinaktc?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/watermelon.jpg": {
+  "by": "Art Rachen",
+  "link": "https://unsplash.com/@artrachen?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/green-guava.jpg": {
+  "by": "kalai venthan gopal",
+  "link": "https://unsplash.com/@venthan05_photohouse?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/broiler-chicken.jpg": {
+  "by": "Rimsha Noor",
+  "link": "https://unsplash.com/@rimshaj123?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/chicken-breast.jpg": {
+  "by": "Rimsha Noor",
+  "link": "https://unsplash.com/@rimshaj123?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/beef-boneless.jpg": {
+  "by": "Garvit Nama",
+  "link": "https://unsplash.com/@garvitnama?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/beef-mince.jpg": {
+  "by": "Jonathan Cooper",
+  "link": "https://unsplash.com/@theshuttervision?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/mutton.jpg": {
+  "by": "John Cameron",
+  "link": "https://unsplash.com/@john_cameron?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/rohu-fish.jpg": {
+  "by": "Ashwini Kumar Mishra",
+  "link": "https://unsplash.com/@ashash786?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/prawn.jpg": {
+  "by": "Jackson Douglas",
+  "link": "https://unsplash.com/@jacksondouglas?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/fresh-milk-1l.jpg": {
+  "by": "Mehrshad Rajabi",
+  "link": "https://unsplash.com/@mehrshadr?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/plain-yogurt-500g.jpg": {
+  "by": "Mitch Fox",
+  "link": "https://unsplash.com/@mitchellf0x?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/fresh-cream-200ml.jpg": {
+  "by": "Tangerine Newt",
+  "link": "https://unsplash.com/@tangerinenewt?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/condensed-milk.jpg": {
+  "by": "Diana Krotova",
+  "link": "https://unsplash.com/@redpuma?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/farm-eggs-12.jpg": {
+  "by": "Mockup Graphics",
+  "link": "https://unsplash.com/@mockupgraphics?utm_source=freshly&utm_medium=referral"
+ },
+ "/images/brown-eggs-6.jpg": {
+  "by": "Mockup Graphics",
+  "link": "https://unsplash.com/@mockupgraphics?utm_source=freshly&utm_medium=referral"
+ }
+}

@@ -1,0 +1,165 @@
+// English -> Bangla phrase book used by components/layout/DomTranslate.js.
+// Exact phrases (trimmed). Anything not listed stays English, so just ADD a line when you add new text to the site.
+import { MORE, MORE_PATTERNS, setLookup } from "./bnPhrasesMore";
+
+export const PHRASES = {
+  // ---- header / menu / nav ----
+  "Delivery area": "ডেলিভারি এলাকা", "Delivery charge": "ডেলিভারি চার্জ", "Express available": "এক্সপ্রেস পাওয়া যাবে", "live": "চলছে", "ends in": "শেষ হবে",
+  "Shop now →": "এখনই কিনুন →", "Shop now": "এখনই কিনুন", "Call 09 4932 4782": "ফোন করুন 09 4932 4782", "Wishlist": "উইশলিস্ট", "Login": "লগইন", "Cart": "কার্ট",
+  "Home": "হোম", "Categories": "ক্যাটাগরি", "Brands": "ব্র্যান্ড", "Top Saver": "সেরা সাশ্রয়", "For You": "আপনার জন্য", "Reorder & Recipes": "রিঅর্ডার ও রেসিপি",
+  "Pages": "পেজ", "All pages": "সব পেজ", "Page sections": "পেজের অংশ", "Language": "ভাষা", "Your wishlist": "আপনার উইশলিস্ট",
+  "Shop": "দোকান", "All products": "সব পণ্য", "Cart & orders": "কার্ট ও অর্ডার", "Checkout": "চেকআউট", "My orders": "আমার অর্ডার", "My account": "আমার অ্যাকাউন্ট",
+  "Help & info": "সাহায্য ও তথ্য", "FAQ": "সাধারণ প্রশ্ন", "Delivery information": "ডেলিভারি তথ্য", "Return & refund": "রিটার্ন ও রিফান্ড", "Contact": "যোগাযোগ", "About": "আমাদের সম্পর্কে",
+  "Careers": "ক্যারিয়ার", "Privacy policy": "গোপনীয়তা নীতি", "Terms & conditions": "শর্তাবলি", "Delivery Information": "ডেলিভারি তথ্য", "Help Center": "সাহায্য কেন্দ্র",
+  "Return & Refund": "রিটার্ন ও রিফান্ড", "Privacy Policy": "গোপনীয়তা নীতি", "Terms & Conditions": "শর্তাবলি",
+  // ---- hero ----
+  "Freshly Grocery": "ফ্রেশলি গ্রোসারি", "Search products, brands, categories": "পণ্য, ব্র্যান্ড, ক্যাটাগরি খুঁজুন", "Live now": "এখন চলছে", "Coming soon": "শীঘ্রই আসছে",
+  "Ends in": "শেষ হবে", "Starts in": "শুরু হবে", "Hurry up!": "তাড়াতাড়ি করুন!", "Don't miss it": "মিস করবেন না", "Remind me": "মনে করিয়ে দিন", "Reminder set ✓": "রিমাইন্ডার সেট ✓",
+  "BIG SALE": "বিগ সেল", "MEGA OFFER": "মেগা অফার", "FLASH DEAL": "ফ্ল্যাশ ডিল", "upto": "সর্বোচ্চ", "OFF": "ছাড়", "Fresh every day": "প্রতিদিন তাজা", "Cash on delivery": "ক্যাশ অন ডেলিভারি",
+  "No match. Try a different word.": "কিছু পাওয়া যায়নি। অন্য শব্দ দিয়ে চেষ্টা করুন।", "Brand": "ব্র্যান্ড", "Category": "ক্যাটাগরি",
+  // ---- shop / filters ----
+  "Shop all products": "সব পণ্য", "All": "সব", "Hide filters": "ফিল্টার লুকান", "Show filters": "ফিল্টার দেখুন", "Search": "খুঁজুন", "Name, brand…": "নাম, ব্র্যান্ড…", "Search products": "পণ্য খুঁজুন",
+  "Price (৳)": "দাম (৳)", "Min": "সর্বনিম্ন", "Max": "সর্বোচ্চ", "Minimum price": "সর্বনিম্ন দাম", "Maximum price": "সর্বোচ্চ দাম", "In stock only": "শুধু স্টকে আছে", "Offers only": "শুধু অফার",
+  "Clear filters": "ফিল্টার মুছুন", "Sort by": "সাজান", "Sort products": "পণ্য সাজান", "Relevance": "প্রাসঙ্গিক", "Price: low to high": "দাম: কম থেকে বেশি", "Price: high to low": "দাম: বেশি থেকে কম",
+  "Biggest discount": "সবচেয়ে বেশি ছাড়", "Name A–Z": "নাম A–Z", "No products found": "কোনো পণ্য পাওয়া যায়নি", "Try removing a filter or searching for something else.": "কোনো ফিল্টার সরান বা অন্য কিছু খুঁজুন।",
+  "product": "টি পণ্য", "products": "টি পণ্য", "saved item": "টি সংরক্ষিত পণ্য", "saved items": "টি সংরক্ষিত পণ্য",
+  // ---- product ----
+  "Add to cart": "কার্টে যোগ করুন", "Add": "যোগ করুন", "Buy now": "এখনই কিনুন", "Go to cart →": "কার্টে যান →", "You save": "আপনি বাঁচাচ্ছেন", "% off)": "% ছাড়)", "% off": "% ছাড়",
+  "Sold by weight. Price updates with the weight you pick (500 g steps)": "ওজন অনুযায়ী বিক্রি। আপনার বাছা ওজন অনুযায়ী দাম বদলাবে (৫০০ গ্রাম করে)",
+  "Product not found": "পণ্য পাওয়া যায়নি", "This product may have been removed.": "এই পণ্যটি হয়তো সরিয়ে ফেলা হয়েছে।", "No reviews yet · Write the first": "এখনো রিভিউ নেই · প্রথম রিভিউ লিখুন",
+  "♡ Wishlist": "♡ উইশলিস্ট", "♥ Saved": "♥ সেভ করা", "Product details": "পণ্যের বিবরণ", "Type": "ধরন", "Sold as": "বিক্রি হয়", "By weight (500 g steps)": "ওজনে (৫০০ গ্রাম করে)", "Per piece": "পিস হিসেবে",
+  "Availability": "প্রাপ্যতা", "In stock": "স্টকে আছে", "Out of stock": "স্টক শেষ", "Sold out": "বিক্রি শেষ", "Low stock": "স্টক কম", "Only a few left": "মাত্র কয়েকটি বাকি", "Fresh": "তাজা", "Near expiry": "মেয়াদ প্রায় শেষ",
+  "Frequently bought together": "প্রায়ই একসাথে কেনা হয়", "View full page →": "পুরো পেজ দেখুন →", "Similar products": "একই ধরনের পণ্য", "Substitutes": "বিকল্প পণ্য", "Pack size": "প্যাক সাইজ",
+  "Notify me when back": "ফিরলে জানান", "We'll notify you ✓": "আমরা জানাব ✓", "Delivery to": "ডেলিভারি এলাকা", "In stock and close in type and price.": "স্টকে আছে এবং ধরন ও দামে কাছাকাছি।",
+  "Cart & orders ": "কার্ট ও অর্ডার", "Wishlist items": "উইশলিস্টের পণ্য",
+  // ---- reviews ----
+  "Reviews": "রিভিউ", "review": "রিভিউ", "reviews": "রিভিউ", "Show all": "সব দেখুন", "✓ Verified purchase": "✓ যাচাইকৃত ক্রেতা", "👍 Helpful": "👍 সহায়ক", "No reviews match this filter.": "এই ফিল্টারে কোনো রিভিউ নেই।",
+  "No reviews yet. Be the first to review this product.": "এখনো রিভিউ নেই। প্রথম রিভিউটি আপনিই লিখুন।", "Write a review": "রিভিউ লিখুন", "Submit review": "রিভিউ জমা দিন", "Your review": "আপনার রিভিউ",
+  "Bought this product? Log in to share your review.": "পণ্যটি কিনেছেন? রিভিউ দিতে লগইন করুন।", "Log in to review": "রিভিউ দিতে লগইন করুন", "Thank you! Your review is added.": "ধন্যবাদ! আপনার রিভিউ যোগ হয়েছে।",
+  "Please tap a star rating first.": "আগে তারা চিহ্নে রেটিং দিন।", "Poor": "খারাপ", "Fair": "মোটামুটি", "Good": "ভালো", "Very good": "খুব ভালো", "Excellent": "চমৎকার",
+  "How was the quality, freshness, packing? (optional)": "মান, তাজাভাব, প্যাকিং কেমন ছিল? (ঐচ্ছিক)", "Filter reviews by stars": "তারা দিয়ে রিভিউ বাছুন", "Sort reviews": "রিভিউ সাজান",
+  "Tip: customers who bought this product get a “Verified purchase” badge.": "টিপ: যারা পণ্যটি কিনেছেন তারা “যাচাইকৃত ক্রেতা” ব্যাজ পান।",
+  "Newest": "নতুন আগে", "Most helpful": "সবচেয়ে সহায়ক", "Highest rated": "সর্বোচ্চ রেটিং", "Lowest rated": "সর্বনিম্ন রেটিং",
+  // ---- cart ----
+  "Your cart": "আপনার কার্ট", "Your cart is empty": "আপনার কার্ট খালি", "Add something fresh and it will show up here.": "তাজা কিছু যোগ করুন, এখানে দেখা যাবে।", "Free delivery unlocked": "ফ্রি ডেলিভারি পাচ্ছেন",
+  "Free delivery applies to Standard delivery only. Express always has a fee.": "ফ্রি ডেলিভারি শুধু স্ট্যান্ডার্ড ডেলিভারিতে। এক্সপ্রেসে সবসময় চার্জ লাগে।",
+  "Replace with similar brand": "একই ধরনের ব্র্যান্ড দিয়ে বদলান", "Remove if unavailable": "না থাকলে বাদ দিন", "Call me": "আমাকে ফোন করুন", "Save for later": "পরে কিনব", "Remove": "বাদ দিন", "Saved for later": "পরের জন্য রাখা",
+  "Add all to cart": "সব কার্টে দিন", "Continue shopping": "কেনাকাটা চালিয়ে যান", "Subtotal": "সাবটোটাল", "Delivery fee": "ডেলিভারি চার্জ", "Total": "মোট", "Subscribe & save": "সাবস্ক্রাইব করে সাশ্রয়", "Coupon": "কুপন",
+  "Free": "ফ্রি", "Coupon code": "কুপন কোড", "Apply": "প্রয়োগ", "applied": "প্রয়োগ হয়েছে", "Could not apply this coupon.": "কুপনটি প্রয়োগ করা যায়নি।", "Not applicable now.": "এখন প্রযোজ্য নয়।",
+  "Decrease": "কমান", "Increase": "বাড়ান", "Nothing saved yet": "এখনো কিছু সেভ করা হয়নি", "Tap the heart on any product to save it for later.": "পরে দেখার জন্য পণ্যের হার্টে চাপ দিন।",
+  "View cart": "কার্ট দেখুন", "Your Cart": "আপনার কার্ট", "Empty cart": "কার্ট খালি", "Close": "বন্ধ", "Cancel": "বাতিল", "Edit": "সম্পাদনা", "Delete": "মুছুন",
+  // ---- checkout ----
+  "Delivery address": "ডেলিভারির ঠিকানা", "Add a new address": "নতুন ঠিকানা যোগ করুন", "Editing saved address": "সেভ করা ঠিকানা এডিট হচ্ছে", "Home ": "বাসা", "Office": "অফিস", "Save address": "ঠিকানা সেভ করুন",
+  "Payment": "পেমেন্ট", "Card": "কার্ড", "Cash on Delivery": "ক্যাশ অন ডেলিভারি", "bKash": "বিকাশ", "Nagad": "নগদ", "You will be taken to our secure card payment page after you place the order.": "অর্ডার করার পর আপনাকে নিরাপদ কার্ড পেমেন্ট পেজে নেওয়া হবে।",
+  "Buy now · this item only": "এখনই কিনুন · শুধু এই পণ্য", "Order review": "অর্ডার পর্যালোচনা", "Your cart is not part of this order.": "আপনার কার্টের পণ্য এই অর্ডারে নেই।", "Express delivery · within ~90 min": "এক্সপ্রেস ডেলিভারি · প্রায় ৯০ মিনিটে",
+  "Deliver to:": "ডেলিভারি ঠিকানা:", "Place order": "অর্ডার করুন", "Placing order…": "অর্ডার হচ্ছে…", "Order placed": "অর্ডার হয়েছে", "Thank you! Order ID": "ধন্যবাদ! অর্ডার আইডি", "Estimated delivery:": "আনুমানিক ডেলিভারি:", "· Total": "· মোট",
+  "Pay cash when your order arrives.": "অর্ডার পৌঁছালে নগদ টাকা দিন।", "Your cart is empty.": "আপনার কার্ট খালি।", "Enter your delivery address to continue.": "চালিয়ে যেতে ডেলিভারির ঠিকানা দিন।", "No delivery slot is available right now.": "এখন কোনো ডেলিভারি স্লট খালি নেই।",
+  "Save or cancel your address changes first.": "আগে ঠিকানার পরিবর্তন সেভ বা বাতিল করুন।", "Please enter the full address.": "পুরো ঠিকানা লিখুন।", "← Back to cart": "← কার্টে ফিরুন", "Please log in to place your order.": "অর্ডার করতে অনুগ্রহ করে লগইন করুন।",
+  "Delivery": "ডেলিভারি", "Delivery slot": "ডেলিভারির সময়", "Standard": "স্ট্যান্ডার্ড", "Express": "এক্সপ্রেস", "Today": "আজ", "Tomorrow": "আগামীকাল", "Pick a time": "সময় বাছুন", "Standard delivery": "স্ট্যান্ডার্ড ডেলিভারি", "Express delivery": "এক্সপ্রেস ডেলিভারি",
+  "📄 Download invoice": "📄 ইনভয়েস ডাউনলোড", "Download invoice": "ইনভয়েস ডাউনলোড",
+  // ---- orders ----
+  "My orders ": "আমার অর্ডার", "Order details": "অর্ডারের বিবরণ", "Order not found": "অর্ডার পাওয়া যায়নি", "Check the order ID or open it from My orders.": "অর্ডার আইডি দেখুন বা আমার অর্ডার থেকে খুলুন।", "Loading order…": "অর্ডার লোড হচ্ছে…",
+  "This order was cancelled.": "এই অর্ডারটি বাতিল হয়েছে।", "Items": "পণ্যসমূহ", "Deliver to": "ডেলিভারি ঠিকানা", "Express · within ~90 minutes": "এক্সপ্রেস · প্রায় ৯০ মিনিটে", "Details": "বিস্তারিত", "On the way": "পথে আছে", "Delivered": "পৌঁছে গেছে", "Cancelled": "বাতিল",
+  "No orders yet": "এখনো কোনো অর্ডার নেই", "Your orders and their live tracking will show here.": "আপনার অর্ডার ও লাইভ ট্র্যাকিং এখানে দেখা যাবে।", "No orders in this list.": "এই তালিকায় কোনো অর্ডার নেই।", "Buy again": "আবার কিনুন", "⚡ Quick reorder": "⚡ দ্রুত রিঅর্ডার", "Quick reorder": "দ্রুত রিঅর্ডার",
+  "Cancel order": "অর্ডার বাতিল", "Return / refund": "রিটার্ন / রিফান্ড", "Order cancelled": "অর্ডার বাতিল হয়েছে", "Yes, cancel": "হ্যাঁ, বাতিল করুন", "Keep order": "অর্ডার রাখুন", "Order": "অর্ডার", "Placed": "অর্ডারের সময়", "Arriving": "পৌঁছাবে",
+  "Confirmed": "নিশ্চিত", "Preparing": "প্রস্তুত হচ্ছে", "Packed": "প্যাক হয়েছে", "Out for Delivery": "ডেলিভারির পথে", "Paid": "পরিশোধিত", "Pending": "অপেক্ষমাণ", "Pay on delivery": "ডেলিভারিতে পরিশোধ",
+  "Return requested": "রিটার্নের অনুরোধ করা হয়েছে", "Why are you returning?": "কেন ফেরত দিচ্ছেন?", "Send return request": "রিটার্ন অনুরোধ পাঠান", "Return request sent. We will call you soon.": "রিটার্ন অনুরোধ পাঠানো হয়েছে। আমরা শীঘ্রই ফোন করব।",
+  "Damaged / not fresh": "নষ্ট / তাজা নয়", "Wrong item": "ভুল পণ্য", "Missing item": "পণ্য কম এসেছে", "Quality not good": "মান ভালো না", "Other": "অন্যান্য", "Add a note (optional)": "নোট লিখুন (ঐচ্ছিক)", "Something went wrong. Please try again.": "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+  // ---- invoice / payment ----
+  "Invoice": "ইনভয়েস", "Invoice not found": "ইনভয়েস পাওয়া যায়নি", "Loading invoice…": "ইনভয়েস লোড হচ্ছে…", "← Back to order": "← অর্ডারে ফিরুন", "Print / Save as PDF": "প্রিন্ট / PDF সেভ", "No.": "নং", "Billed to": "বিল প্রাপক", "Item": "পণ্য", "Price": "দাম", "Qty": "পরিমাণ", "Payment:": "পেমেন্ট:",
+  "Thank you for shopping with Freshly. This is a computer-generated invoice.": "ফ্রেশলি থেকে কেনাকাটার জন্য ধন্যবাদ। এটি কম্পিউটারে তৈরি ইনভয়েস।", "Fresh groceries delivered to your door": "তাজা মুদি পণ্য আপনার দরজায়",
+  "Payment successful": "পেমেন্ট সফল হয়েছে", "Thank you! We have received your payment and started preparing your order.": "ধন্যবাদ! আপনার পেমেন্ট পেয়েছি এবং অর্ডার প্রস্তুত করা শুরু করেছি।", "Payment failed": "পেমেন্ট ব্যর্থ হয়েছে",
+  "Your payment was not completed. You can go back to your cart and try again.": "আপনার পেমেন্ট সম্পন্ন হয়নি। কার্টে ফিরে আবার চেষ্টা করতে পারেন।", "Payment cancelled": "পেমেন্ট বাতিল হয়েছে", "You cancelled the payment. Your cart is still saved if you want to try again.": "আপনি পেমেন্ট বাতিল করেছেন। আবার চেষ্টা করতে চাইলে কার্ট সেভ করা আছে।",
+  "Order ID": "অর্ডার আইডি", "Track my order": "অর্ডার ট্র্যাক করুন", "Back to cart": "কার্টে ফিরুন", "Unknown payment result": "অজানা পেমেন্ট ফলাফল",
+  // ---- account / auth ----
+  "Account": "অ্যাকাউন্ট", "Orders": "অর্ডার", "Profile": "প্রোফাইল", "Full name": "পুরো নাম", "Email": "ইমেইল", "Name": "নাম", "Password": "পাসওয়ার্ড", "Saving…": "সেভ হচ্ছে…", "Save changes": "পরিবর্তন সেভ করুন", "Profile saved.": "প্রোফাইল সেভ হয়েছে।",
+  "Change password": "পাসওয়ার্ড বদলান", "Current password": "বর্তমান পাসওয়ার্ড", "New password": "নতুন পাসওয়ার্ড", "New password (min 6 characters)": "নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)", "Repeat new password": "নতুন পাসওয়ার্ড আবার দিন", "Password changed.": "পাসওয়ার্ড বদলেছে।",
+  "Saved addresses": "সেভ করা ঠিকানা", "Loading…": "লোড হচ্ছে…", "No saved address yet. Add one to check out faster.": "এখনো ঠিকানা সেভ নেই। দ্রুত চেকআউটের জন্য একটি যোগ করুন।", "House, road, area": "বাড়ি, রাস্তা, এলাকা", "Full address": "পুরো ঠিকানা", "+ Add address": "+ ঠিকানা যোগ করুন", "Log out": "লগ আউট",
+  "Please log in": "অনুগ্রহ করে লগইন করুন", "Log in / Sign up": "লগইন / সাইন আপ", "Log in": "লগইন", "Sign up": "সাইন আপ", "Register": "রেজিস্টার", "Create account": "অ্যাকাউন্ট খুলুন", "Please log in to continue.": "চালিয়ে যেতে লগইন করুন।",
+  "Please log in to see your wishlist.": "উইশলিস্ট দেখতে লগইন করুন।", "Please log in to see your orders.": "অর্ডার দেখতে লগইন করুন।", "Please log in to see this order.": "এই অর্ডার দেখতে লগইন করুন।", "Please log in to see your account.": "অ্যাকাউন্ট দেখতে লগইন করুন।", "Please log in to see your invoice.": "ইনভয়েস দেখতে লগইন করুন।",
+  "Wrong email or password.": "ইমেইল বা পাসওয়ার্ড ভুল।", "Welcome back": "আবার স্বাগতম",
+  // ---- generic pages ----
+  "Breadcrumb": "পথ", "We couldn't find that page": "পেজটি খুঁজে পাওয়া যায়নি", "It may have moved, or the link is wrong.": "এটি সরে গেছে বা লিংকটি ভুল।", "Go home": "হোমে যান", "Browse products": "পণ্য দেখুন", "Start shopping": "কেনাকাটা শুরু করুন", "Page not found": "পেজ পাওয়া যায়নি",
+  "Category not found": "ক্যাটাগরি পাওয়া যায়নি", "Pick one from the Pages menu or browse all products.": "পেজ মেনু থেকে বাছুন বা সব পণ্য দেখুন।", "Something went wrong": "কিছু ভুল হয়েছে", "Please try again. If it keeps happening, call us on 09 4932 4782.": "আবার চেষ্টা করুন। সমস্যা থাকলে 09 4932 4782 নম্বরে ফোন করুন।", "Try again": "আবার চেষ্টা করুন",
+  "Frequently asked questions": "সাধারণ প্রশ্ন", "How do I order?": "কীভাবে অর্ডার করব?", "Browse as a guest, log in when you add items, then check out from the cart.": "গেস্ট হিসেবে ঘুরে দেখুন, পণ্য নিয়ে চেকআউটের সময় লগইন করুন।", "How much is delivery?": "ডেলিভারি চার্জ কত?",
+  "What delivery times are there?": "ডেলিভারির সময় কখন?", "How can I pay?": "কীভাবে পেমেন্ট করব?", "Where is my order?": "আমার অর্ডার কোথায়?", "Open My orders to see live tracking: Confirmed, Preparing, Packed, Out for Delivery, Delivered.": "লাইভ ট্র্যাকিং দেখতে আমার অর্ডার খুলুন: নিশ্চিত, প্রস্তুত হচ্ছে, প্যাক, ডেলিভারির পথে, পৌঁছে গেছে।",
+  "Can I change or cancel my order?": "অর্ডার বদলানো বা বাতিল করা যায়?", "You can cancel from the order page until it is packed. After that, please call us on 09 4932 4782.": "প্যাক হওয়ার আগ পর্যন্ত অর্ডার পেজ থেকে বাতিল করা যায়। এরপর 09 4932 4782 নম্বরে ফোন করুন।",
+  "What if an item is out of stock?": "পণ্য স্টকে না থাকলে?", "In your cart choose what we should do: replace with a similar brand, remove it, or call you.": "কার্টে বেছে নিন: একই ধরনের ব্র্যান্ড দিয়ে বদলানো, বাদ দেওয়া, অথবা আপনাকে ফোন করা।", "Can I use a coupon?": "কুপন ব্যবহার করা যায়?",
+  "Yes. Enter the code in your cart. The minimum order and the maximum discount are shown when you apply it.": "হ্যাঁ। কার্টে কোড দিন। প্রয়োগের সময় সর্বনিম্ন অর্ডার ও সর্বোচ্চ ছাড় দেখানো হবে।", "How do returns and refunds work?": "রিটার্ন ও রিফান্ড কীভাবে হয়?", "See the Return & refund page for the rules on fresh and packaged items.": "তাজা ও প্যাকেটজাত পণ্যের নিয়মের জন্য রিটার্ন ও রিফান্ড পেজ দেখুন।",
+  "Still need help?": "আরও সাহায্য লাগবে?", "Contact us": "যোগাযোগ করুন", "Need more help?": "আরও সাহায্য লাগবে?", "Read the FAQ": "সাধারণ প্রশ্ন পড়ুন", "How can I pay?.": "কীভাবে পেমেন্ট করব?",
+  // ---- footer / drawer / misc (best guesses; extra lines are harmless) ----
+  "Quick links": "দ্রুত লিংক", "Customer care": "গ্রাহক সেবা", "Follow us": "আমাদের ফলো করুন", "Help": "সাহায্য", "Company": "কোম্পানি", "Download our app": "আমাদের অ্যাপ নিন", "All rights reserved.": "সর্বস্বত্ব সংরক্ষিত।",
+  "Free delivery": "ফ্রি ডেলিভারি", "Fresh & organic": "তাজা ও অর্গানিক", "Secure payment": "নিরাপদ পেমেন্ট", "Easy returns": "সহজ রিটার্ন", "Support": "সাপোর্ট", "Newsletter": "নিউজলেটার", "Subscribe": "সাবস্ক্রাইব", "Recommended": "সুপারিশকৃত",
+  "Install app": "অ্যাপ ইনস্টল করুন", "You are offline. Showing saved pages.": "আপনি অফলাইনে আছেন। সংরক্ষিত পেজ দেখাচ্ছে।", "Order cancelled ": "অর্ডার বাতিল হয়েছে",
+  "Add a note": "নোট যোগ করুন", "Done": "হয়েছে", "Next": "পরবর্তী", "Previous": "আগের", "Prev": "আগের", "Page": "পেজ", "Showing": "দেখানো হচ্ছে", "View all": "সব দেখুন", "See all": "সব দেখুন", "View": "দেখুন", "Save": "সেভ", "Back": "পিছনে",
+  "Fruits": "ফল", "Vegetables": "সবজি", "Dairy": "দুগ্ধজাত", "Meat": "মাংস", "Fish": "মাছ", "Bakery": "বেকারি", "Beverages": "পানীয়", "Snacks": "স্ন্যাকস", "Rice": "চাল", "Oil": "তেল", "Spices": "মসলা", "Eggs": "ডিম", "Household": "ঘরের সামগ্রী", "Personal care": "ব্যক্তিগত যত্ন", "Baby care": "শিশুর যত্ন",
+};
+
+// Sentences that carry numbers / names. Each: [regex, (…captures) => bangla]
+export const PATTERNS = [
+  [/^Free delivery over (৳\s?[\d,]+)$/, (a) => `${a} এর বেশি অর্ডারে ফ্রি ডেলিভারি`],
+  [/^Free delivery on orders of (৳\s?[\d,]+) or more \(Standard delivery\)\.$/, (a) => `${a} বা তার বেশি অর্ডারে ফ্রি ডেলিভারি (স্ট্যান্ডার্ড ডেলিভারি)।`],
+  [/^Free on orders of (৳\s?[\d,]+)\+$/, (a) => `${a}+ অর্ডারে ফ্রি`],
+  [/^Add (৳\s?[\d,]+) more for free delivery$/, (a) => `ফ্রি ডেলিভারির জন্য আরও ${a} যোগ করুন`],
+  [/^See all results for “(.+)” →$/, (a) => `“${a}” এর সব ফলাফল দেখুন →`],
+  [/^for “(.+)”$/, (a) => `“${a}” এর জন্য`],
+  [/^Reviews \((\d+)\)$/, (a) => `রিভিউ (${a})`],
+  [/^More from (.+)$/, (a) => `${a} এর আরও পণ্য`],
+  [/^Show all (\d+) reviews$/, (a) => `সব ${a}টি রিভিউ দেখুন`],
+  [/^(\d) stars?$/, (a) => `${a} তারা`],
+  [/^(\d+) out of 5 stars$/, (a) => `৫ এর মধ্যে ${a} তারা`],
+  [/^Not applicable now\. Minimum order (৳\s?[\d,]+)\.$/, (a) => `এখন প্রযোজ্য নয়। সর্বনিম্ন অর্ডার ${a}।`],
+  [/^Add (৳\s?\d+) more to use (\S+) \(minimum order (৳\s?\d+)\)\.$/, (a, c, m) => `${c} ব্যবহার করতে আরও ${a} যোগ করুন (সর্বনিম্ন অর্ডার ${m})।`],
+  [/^Only (.+) of (.+) available$/, (q, n) => `${n} মাত্র ${q} আছে`],
+  [/^(.+) is out of stock$/, (n) => `${n} স্টকে নেই`],
+  [/^(\d+) out-of-stock (.+) skipped$/, (n) => `${n}টি স্টকশূন্য পণ্য বাদ গেছে`],
+  [/^(\d+) unavailable items? skipped$/, (n) => `${n}টি অনুপলব্ধ পণ্য বাদ গেছে`],
+  [/^(.+) address in (.+)$/, (t, a) => `${a} এ ${t === "Home" ? "বাসার" : t === "Office" ? "অফিসের" : t} ঠিকানা`],
+  [/^Enter your (bKash|Nagad) number to continue\.$/, (w) => `চালিয়ে যেতে আপনার ${w === "bKash" ? "বিকাশ" : "নগদ"} নম্বর দিন।`],
+  [/^Your (bKash|Nagad) number \(01XXXXXXXXX\)$/, (w) => `আপনার ${w === "bKash" ? "বিকাশ" : "নগদ"} নম্বর (01XXXXXXXXX)`],
+  [/^(bKash|Nagad|Card|Cash on Delivery) payment is (received|pending confirmation)\.$/, (m, s) => `${{ bKash: "বিকাশ", Nagad: "নগদ", Card: "কার্ড", "Cash on Delivery": "ক্যাশ অন ডেলিভারি" }[m]} পেমেন্ট ${s === "received" ? "পাওয়া গেছে" : "নিশ্চিতকরণের অপেক্ষায়"}।`],
+  [/^Standard delivery · (.+)$/, (a) => `স্ট্যান্ডার্ড ডেলিভারি · ${a}`],
+  [/^Standard · (today|tomorrow), (.+)$/, (d, s) => `স্ট্যান্ডার্ড · ${d === "today" ? "আজ" : "আগামীকাল"}, ${s}`],
+  [/^Courier · (.+)$/, (a) => `কুরিয়ার · ${a}`],
+  [/^Courier in (.+)$/, (a) => `কুরিয়ার ${a} এর মধ্যে`],
+  [/^Courier (.+)$/, (a) => `কুরিয়ার ${a}`],
+  [/^Slots or Express \(~90 min\)$/, () => "সময় স্লট বা এক্সপ্রেস (~৯০ মিনিট)"], [/^Choose a slot at checkout$/, () => "চেকআউটে সময় বাছুন"],
+  [/^Time slots or Express \(~90 min\)$/, () => "সময় স্লট বা এক্সপ্রেস (~৯০ মিনিট)"],
+  [/^Decrease (.+)$/, (n) => `${n} কমান`], [/^Increase (.+)$/, (n) => `${n} বাড়ান`], [/^View (.+)$/, (n) => `${n} দেখুন`],
+  [/^If (.+) is unavailable$/, (n) => `${n} না থাকলে`],
+  [/^Coupon \((.+)\)$/, (c) => `কুপন (${c})`],
+  [/^Coupon (\S+) applied$/, (c) => `কুপন ${c} প্রয়োগ হয়েছে`],
+  [/^(\S+) number$/, (w) => `${w === "bKash" ? "বিকাশ" : w === "Nagad" ? "নগদ" : w} নম্বর`],
+  [/^Order (ORD-\d+)$/, (id) => `অর্ডার ${id}`],
+  [/^Cancel order (ORD-\d+)\? This cannot be undone\.$/, (id) => `${id} বাতিল করবেন? এটি আর ফেরানো যাবে না।`],
+  [/^(.+) · Substitutes$/, (n) => `${n} · বিকল্প পণ্য`],
+  [/^Return requested · (.+)$/, (r) => `রিটার্নের অনুরোধ · ${r}`],
+  [/^Deliver to: (.+)$/, (a) => `ডেলিভারি ঠিকানা: ${a}`],
+  [/^Delivery charge (৳\s?[\d,]+)(.*)$/, (a, rest) => `ডেলিভারি চার্জ ${a}${rest}`],
+  [/^You save (৳\s?[\d,]+)( on this order)?$/, (a, o) => `আপনি ${o ? "এই অর্ডারে " : ""}${a} বাঁচাচ্ছেন`],
+  [/^Checkout · (৳\s?[\d,]+)$/, (a) => `চেকআউট · ${a}`],
+  [/^Subscribe & save (\d+)%$/, (a) => `সাবস্ক্রাইব করে ${a}% সাশ্রয়`],
+  [/^Only (\d+) left$/, (a) => `মাত্র ${a}টি বাকি`],
+  [/^(\d+)% (OFF|off)$/, (a) => `${a}% ছাড়`],
+  [/^Page (\d+) of (\d+)$/, (a, b) => `পেজ ${a} / ${b}`],
+  [/^Welcome, (.+)$/, (n) => `স্বাগতম, ${n}`],
+];
+
+export const MONTHS = { Jan: "জানু", Feb: "ফেব্রু", Mar: "মার্চ", Apr: "এপ্রিল", May: "মে", Jun: "জুন", Jul: "জুলাই", Aug: "আগস্ট", Sep: "সেপ্টেম্বর", Oct: "অক্টোবর", Nov: "নভেম্বর", Dec: "ডিসেম্বর" };
+// Number-aware fallbacks for text we could not match exactly (dates, "today 5-6 PM", "500 g", "2-4 days"). Only used when the text has a digit.
+export const FALLBACKS = [
+  [/(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g, (m, d, mo) => `${d} ${MONTHS[mo]}`],
+  [/(\d)\s?(am|pm)\b/gi, (m, d, ap) => `${d} ${ap.toLowerCase() === "am" ? "সকাল" : "বিকাল"}`],
+  [/(\d)\s?kg\b/gi, (m, d) => `${d} কেজি`], [/\/kg\b/gi, () => "/কেজি"],
+  [/(\d)\s?g\b/g, (m, d) => `${d} গ্রাম`],
+  [/(\d)\s?(pcs?|pieces?)\b/gi, (m, d) => `${d} পিস`],
+  [/(\d)\s?(mins?|minutes?)\b/gi, (m, d) => `${d} মিনিট`],
+  [/(\d)\s?(hrs?|hours?)\b/gi, (m, d) => `${d} ঘণ্টা`],
+  [/(\d)\s?days?\b/gi, (m, d) => `${d} দিন`],
+  [/\btoday\b/gi, () => "আজ"], [/\btomorrow\b/gi, () => "আগামীকাল"],
+];
+
+// extra phrases (products, categories, brands, messages, reviews) live in bnPhrasesMore.js
+Object.assign(PHRASES, MORE);
+setLookup(PHRASES);
+PATTERNS.push(...MORE_PATTERNS);

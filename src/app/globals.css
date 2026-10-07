@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h, 9rem) + 0.5rem); }
+  body { @apply bg-cream font-body text-ink antialiased; }
+  button { @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary; }
+}
+@layer components {
+  .btn { @apply rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-primary-dark disabled:opacity-40; }
+  .container-x { @apply mx-auto w-full max-w-7xl px-4 md:px-6; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+@keyframes progress { from { width: 0 } to { width: 100% } }
+
+/* ---------- Dark mode (toggle in header sets class "dark" on <html>) ---------- */
+.dark body { background-color: #111814; color: #e8efe9; }
+.dark .bg-white { background-color: #1b2620; }
+.dark .bg-cream { background-color: #111814; }
+.dark .bg-sand { background-color: #16201b; }
+.dark .bg-primary-light, .dark .hover\:bg-primary-light:hover { background-color: #25392e; }
+.dark .text-ink { color: #e8efe9; }
+.dark .text-ink\/80 { color: rgba(232,239,233,.8); }
+.dark .text-ink\/70 { color: rgba(232,239,233,.7); }
+.dark .text-ink\/60 { color: rgba(232,239,233,.6); }
+.dark .text-ink\/55 { color: rgba(232,239,233,.55); }
+.dark .text-ink\/50 { color: rgba(232,239,233,.5); }
+.dark .text-ink\/45, .dark .text-ink\/40 { color: rgba(232,239,233,.45); }
+.dark .text-primary, .dark .text-primary-dark, .dark .text-coffee { color: #8fd3a8; }
+.dark .ring-black\/5, .dark .ring-black\/10 { --tw-ring-color: rgba(255,255,255,.1); }
+.dark input, .dark select, .dark textarea { color: #e8efe9; }
+.dark input::placeholder, .dark textarea::placeholder { color: rgba(232,239,233,.45); }
+.dark img { filter: brightness(.92); }

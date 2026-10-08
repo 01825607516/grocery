@@ -7,6 +7,8 @@ import ProductCard from "@/components/product/ProductCard";
 import Pagination from "@/components/ui/Pagination";
 import { Crumbs } from "./common";
 import { hay } from "@/lib/searchText";
+import RecipeHint from "@/components/product/RecipeHint";
+import { recipeHits } from "@/lib/shopping";
 
 const PER_PAGE = 12;
 const SORTS = [["relevance", "Relevance"], ["price-asc", "Price: low to high"], ["price-desc", "Price: high to low"], ["discount", "Biggest discount"], ["name", "Name A–Z"]];
@@ -23,7 +25,7 @@ const chip = (on) => `rounded-full px-4 py-1.5 text-sm transition ${on ? "bg-pri
 // so a filtered list can be shared / bookmarked and the back button works.
 // `category` is set on /category/[id]; on /shop the category is a filter (?cat=).
 export default function ShopView({ category = null }) {
-  const { products, categories } = useCatalog();
+  const { products, categories, recipes, byName } = useCatalog();
   const router = useRouter();
   const path = usePathname();
   const sp = useSearchParams();
@@ -63,6 +65,7 @@ export default function ShopView({ category = null }) {
     return SORT_FN[sort] ? [...out].sort(SORT_FN[sort]) : out;
   }, [scope, categories, q, sub, brands.join(","), min, max, sort, inStock, offersOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const dishes = useMemo(() => (q ? recipeHits(q, recipes, byName).slice(0, 2) : []), [q, recipes, byName]);
   const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const visible = list.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
@@ -124,6 +127,7 @@ export default function ShopView({ category = null }) {
 
         {/* results */}
         <div>
+          {dishes.map((r) => <RecipeHint key={r.name} recipe={r} />)}
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
             <p className="text-ink/70"><b className="text-ink">{list.length}</b> {list.length === 1 ? "product" : "products"}{q ? ` for “${q}”` : ""}</p>
             <label className="flex items-center gap-2">Sort by

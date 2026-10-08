@@ -7,10 +7,21 @@ import Pagination from "@/components/ui/Pagination";
 import ProductCard from "@/components/product/ProductCard";
 
 const PER_PAGE = 5;
+// Grocery deals only: beauty, health, baby and pet products no longer fill the top spots. Chips narrow it down.
+const NOT_GROCERY = new Set(["beauty", "health", "baby", "pet"]);
+const GROUPS = [
+  ["all", "All groceries", null],
+  ["fresh", "Fresh", ["veg", "fruits", "meat", "dairy", "bakery", "frozen"]],
+  ["staples", "Staples", ["grains", "pantry", "spices", "noodles", "breakfast"]],
+  ["snacks", "Snacks & drinks", ["snacks", "drinks", "sweets"]],
+  ["home", "Household", ["home", "hygiene"]],
+];
 
 export default function TopSaver() {
   const { products } = useCatalog();
-  const DEALS = useMemo(() => [...products].filter((p) => p.status !== "out").sort((a, b) => b.discount - a.discount).slice(0, 15), [products]);
+  const [group, setGroup] = useState("all");
+  const cats = GROUPS.find((g) => g[0] === group)[2];
+  const DEALS = useMemo(() => [...products].filter((p) => p.status !== "out" && !NOT_GROCERY.has(p.category) && (!cats || cats.includes(p.category))).sort((a, b) => b.discount - a.discount).slice(0, 15), [products, cats]);
   const [page, setPage] = useState(1);
   const [h, m, s] = useCountdown();
   return (
@@ -18,6 +29,10 @@ export default function TopSaver() {
       <SectionHeading title="Top saver today" right={
         <div className="flex items-center gap-1 text-sm font-semibold"><span className="mr-1 font-normal text-ink/60">Deals end in</span>{[h, m, s].map((v, i) => <span key={i} className="rounded bg-primary-light px-2 py-1 text-coffee">{v}</span>)}</div>
       } />
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-sm font-semibold text-primary-dark">🔥 Best savings today</span>
+        {GROUPS.map(([id, label]) => <button key={id} onClick={() => { setGroup(id); setPage(1); }} aria-pressed={group === id} className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${group === id ? "bg-primary text-white" : "bg-white ring-1 ring-accent/40 hover:bg-primary-light"}`}>{label}</button>)}
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
         {DEALS.slice((page - 1) * PER_PAGE, page * PER_PAGE).map((p) => <ProductCard key={p.id} product={p} />)}
       </div>

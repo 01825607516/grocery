@@ -305,5 +305,27 @@ export const RECIPES = [
   { name: "Chicken Curry & Rice", items: ["Broiler Chicken", "Potato", "Red Onion", "Basmati Rice 5kg", "Garam Masala 100g"] },
   { name: "Crispy Fish Fry", items: ["Rohu Fish", "Turmeric Powder 200g", "Mustard Oil 1L", "Sea Salt 500g"] },
   { name: "Honey Butter Toast", items: ["Sandwich Bread", "Salted Butter 200g", "Forest Honey 500g"] },
+  { name: "Chicken Biryani", items: ["Basmati Rice 5kg", "Broiler Chicken", "Red Onion", "Biryani Masala", "Pure Ghee 500g", "Plain Yogurt 500g"] },
+  { name: "Khichuri", items: ["Miniket Rice 5kg", "Mung Dal 1kg", "Potato", "Turmeric Powder 200g", "Pure Ghee 500g"] },
+  { name: "Egg Curry (Dim Bhuna)", items: ["Farm Eggs (12)", "Red Onion", "Green Chili", "Turmeric Powder 200g", "Soybean Oil 2L"] },
+  { name: "Beef Bhuna", items: ["Beef (boneless)", "Red Onion", "Garam Masala 100g", "Chili Powder 200g", "Mustard Oil 1L"] },
 ];
+// Per-person amounts for every recipe (so "4 people" gives real quantities).
+// "Product name": [amount per person, pack size, unit]  ->  unit is "g" (default), "ml" or a count word ("pc", "slice").
+// Weight items sold per kg (chicken, onion...) are bought in 500 g steps; packs (rice 5kg sack, ghee jar...) are rounded UP to whole packs.
+// Add a new recipe's amounts here (or send `amounts` from the API with each recipe).
+const PER_PERSON = {
+  "Veggie Curry": { "Tomato": [60], "Carrot": [50], "Potato": [100], "Red Onion": [40], "Turmeric Powder 200g": [3, 200] },
+  "Fruit Breakfast Bowl": { "Banana (dozen)": [2, 12, "pc"], "Apple": [100], "Mango": [100], "Plain Yogurt 500g": [80, 500] },
+  "Cheesy Omelette": { "Farm Eggs (12)": [2, 12, "pc"], "Cheese Slices": [1, 10, "slice"], "Salted Butter 200g": [10, 200], "Green Chili": [5] },
+  "Chicken Curry & Rice": { "Broiler Chicken": [250], "Potato": [80], "Red Onion": [50], "Basmati Rice 5kg": [120, 5000], "Garam Masala 100g": [2, 100] },
+  "Crispy Fish Fry": { "Rohu Fish": [200], "Turmeric Powder 200g": [3, 200], "Mustard Oil 1L": [20, 1000, "ml"], "Sea Salt 500g": [3, 500] },
+  "Honey Butter Toast": { "Sandwich Bread": [3, 12, "slice"], "Salted Butter 200g": [10, 200], "Forest Honey 500g": [15, 500] },
+  "Chicken Biryani": { "Basmati Rice 5kg": [120, 5000], "Broiler Chicken": [250], "Red Onion": [50], "Biryani Masala": [10, 40], "Pure Ghee 500g": [15, 500], "Plain Yogurt 500g": [40, 500] },
+  "Khichuri": { "Miniket Rice 5kg": [100, 5000], "Mung Dal 1kg": [50, 1000], "Potato": [60], "Turmeric Powder 200g": [2, 200], "Pure Ghee 500g": [10, 500] },
+  "Egg Curry (Dim Bhuna)": { "Farm Eggs (12)": [2, 12, "pc"], "Red Onion": [50], "Green Chili": [5], "Turmeric Powder 200g": [2, 200], "Soybean Oil 2L": [20, 2000, "ml"] },
+  "Beef Bhuna": { "Beef (boneless)": [200], "Red Onion": [60], "Garam Masala 100g": [2, 100], "Chili Powder 200g": [3, 200], "Mustard Oil 1L": [25, 1000, "ml"] },
+};
+RECIPES.forEach((r) => { r.amounts = PER_PERSON[r.name]; });
+
 export const LAST_ORDER = ["Fresh Milk 1L", "Farm Eggs (12)", "Tomato", "Banana (dozen)"];

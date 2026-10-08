@@ -29,14 +29,17 @@ const FEATURED = ["Carrot", "Orange", "Beef Mince", "Brown Eggs (6)", "Vanilla C
 export default function Recommendations() {
   const { lines, viewed, orders } = useCart();
   const { products, byName } = useCatalog();
+  // real popularity: when the API sends `soldToday` per product, sort by it and call the row "Most bought today"
+  const hasSales = useMemo(() => products.some((p) => p.soldToday != null), [products]);
   const popular = useMemo(() => {
+    if (hasSales) return [...products].filter((p) => p.status !== "out").sort((a, b) => (b.soldToday || 0) - (a.soldToday || 0)).slice(0, 15);
     const featured = byName(FEATURED);
     return [...featured, ...[...products].filter((p) => p.status !== "out" && !FEATURED.includes(p.name)).sort((a, b) => ((b.id * 7) % 11) - ((a.id * 7) % 11))].slice(0, 15);
-  }, [products, byName]);
+  }, [products, byName, hasSales]);
   const rec = useMemo(() => recommend({ products, cartIds: lines.map((l) => l.product.id), viewedIds: viewed, orders }), [products, lines, viewed, orders]);
   return (
     <section className="container-x">
-      <Row title={rec.length ? "Recommended for you" : "Popular picks"} list={rec.length ? rec : popular} classic={!rec.length} />
+      <Row title={rec.length ? "Recommended for you" : hasSales ? "🔥 Most bought today" : "Popular picks"} list={rec.length ? rec : popular} classic={!rec.length} />
     </section>
   );
 }

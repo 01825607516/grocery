@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import HeaderToggles from "./HeaderToggles";
+import HeaderSearch from "./HeaderSearch";
 import useView from "@/hooks/useView";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +10,7 @@ import { useCatalog } from "@/context/CatalogContext";
 import { endOfWeekend } from "@/components/ui/Ticker";
 import { money } from "@/lib/format";
 import CollectionModal from "@/components/product/CollectionModal";
+import { buildSlots } from "@/lib/delivery";
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -91,11 +93,20 @@ export default function Header() {
   const active = useView();
   const pathname = usePathname();
   const { area, setArea, wishlist, isWished, count, setDrawerOpen } = useCart();
-  const { areas, products, offers } = useCatalog();
+  const { areas, products, offers, slots, config } = useCatalog();
   const { user, requireLogin, setAccountOpen } = useAuth();
   const [wishOpen, setWishOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
   const sale = offers.weekend[0];
+  // "Next slot: Today 4 – 6 PM": the first slot still open (courier areas have no slots). Computed after mount, so it never mismatches the server render.
+  const [nextSlot, setNextSlot] = useState("");
+  useEffect(() => {
+    if (area.courier) return setNextSlot("");
+    const tick = () => { const s = buildSlots(slots, new Date(), config.leadHours); const f = s.list.find((x) => !x.disabled); setNextSlot(f ? `${s.dayLabel} ${f.label}` : ""); };
+    tick();
+    const t = setInterval(tick, 60000);
+    return () => clearInterval(t);
+  }, [area, slots, config.leadHours]);
 
   return (
     <header ref={headRef} className="sticky top-0 z-40 border-b border-accent/40 bg-cream">
@@ -108,7 +119,7 @@ export default function Header() {
             <select id="area" value={area.id} onChange={(e) => setArea(areas.find((a) => a.id === e.target.value))} className="max-w-[34vw] truncate rounded bg-transparent font-semibold text-cream outline-none sm:max-w-none [&>option]:text-ink">
               {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <span className="hidden whitespace-nowrap text-cream/60 lg:inline">Delivery charge {money(area.charge)}{area.courier ? ` · ${area.eta}` : area.express ? " · Express available" : ""}</span>
+            <span className="hidden whitespace-nowrap text-cream/60 lg:inline">Delivery charge {money(area.charge)}{area.courier ? ` · ${area.eta}` : area.express ? " · Express available" : ""}{nextSlot ? ` · Next slot: ${nextSlot}` : ""}</span>
           </div>
           {sale && <SaleTicker title={sale.title} onShop={() => setSaleOpen(true)} />}
           <a href="tel:0949324782" className={`hidden whitespace-nowrap font-medium tracking-wide text-accent xl:block ${sale ? "" : "ml-auto"}`}>Call 09 4932 4782</a>
@@ -117,7 +128,7 @@ export default function Header() {
       <div className="container-x flex items-center gap-3 py-3.5 md:gap-5 lg:gap-4">
         <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary">Freshly<span className="text-accent">.</span></a>
         <nav aria-label="Page sections" className="mx-auto hidden lg:block"><NavLinks active={active} /></nav>
-        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><IconButton path={HEART} label="Wishlist" count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
+        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><HeaderSearch /><IconButton path={HEART} label="Wishlist" count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
         <IconButton path={BAG} label="Cart" count={count} onClick={() => setDrawerOpen(true)} />
         <HeaderToggles />
         <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : "Login"} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} /></span>

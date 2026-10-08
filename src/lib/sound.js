@@ -134,3 +134,12 @@ export function playCelebrate(volleys = 8) {
     for (let i = 1; i <= volleys; i++) tone(c, { f: TWINKLE[i % TWINKLE.length], t: i * 0.14, dur: 0.18, vol: 0.05 });
   }, 8000);
 }
+
+// Header mute button: flips the saved setting and tells other components (and other tabs, via "storage") to refresh.
+export function toggleSound() {
+  const next = !isSoundEnabled();
+  setSoundEnabled(next);
+  if (isClient) window.dispatchEvent(new Event("gs-sound-change"));
+  if (next) playPop();   // tiny pop when turning ON so the visitor hears it worked
+  return next;
+}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Art from "@/components/ui/Art";
 import ProductCard from "@/components/product/ProductCard";
 import DeliveryPicker from "@/components/cart/DeliveryPicker";
+import CompleteBasket from "@/components/cart/CompleteBasket";
 import CouponBox from "@/components/cart/CouponBox";
 import SubstitutesSection from "@/components/product/SubstitutesSection";
 import { useI18n } from "@/context/I18nContext";
@@ -60,6 +61,7 @@ export default function CartView() {
                 </div>
               </div>
             ))}
+            <CompleteBasket />
           </div>
 
           <aside className="space-y-3 lg:sticky lg:top-[calc(var(--header-h,9rem)+0.75rem)]">

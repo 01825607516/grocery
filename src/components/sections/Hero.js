@@ -1,14 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { HERO } from "@/lib/data";
 import { useCatalog } from "@/context/CatalogContext";
-import { money } from "@/lib/format";
-import QuantityControl from "@/components/product/QuantityControl";
 import CollectionModal from "@/components/product/CollectionModal";
 import { CountText, endOfWeekend } from "@/components/ui/Ticker";
-import Art from "@/components/ui/Art";
-import { hay } from "@/lib/searchText";
+import HeroListBox from "@/components/list/HeroListBox";
 
 const BELL = "M6 9a6 6 0 1112 0c0 6 2 7 2 7H4s2-1 2-7zM10 20a2 2 0 004 0";
 
@@ -149,24 +145,15 @@ function OfferSlider({ offers, paused, render }) {
 }
 
 export default function Hero() {
-  const { products: all, brands, categories, offers, config } = useCatalog();
-  const [q, setQ] = useState("");
+  const { products: all, offers, config } = useCatalog();
   const [open, setOpen] = useState(null);
-  const [results, setResults] = useState(null); // full search results popup (Enter key)
-  const router = useRouter();
-  const [pick, setPick] = useState(null);       // category / brand chosen from the suggestions
   const [reminded, setReminded] = useState([]);
   const PERKS = [`Free delivery over ৳${config.freeDeliveryLimit}`, "Fresh every day", "Cash on delivery"];
   const OFFERS = useMemo(() => [...offers.weekend.map((o) => ({ ...o, kind: "weekend" })), ...offers.upcoming.map((o) => ({ ...o, kind: "upcoming" }))], [offers]);
-  const term = q.trim().toLowerCase();
-  const match = (p) => [p.name, p.brand, p.sub].some((s) => hay(s).includes(term));
-  const products = term ? all.filter(match).slice(0, 5) : [];
-  const others = term ? [...brands.filter((b) => hay(b).includes(term)).map((b) => ({ type: "brand", name: b })), ...categories.filter((c) => hay(c.name).includes(term)).map((c) => ({ type: "category", name: c.name, id: c.id }))].slice(0, 3) : [];
-  const showAll = () => { if (!term) return; setResults({ title: `Results for “${q.trim()}”`, list: all.filter(match) }); setQ(""); };
   const toggle = (id) => setReminded((r) => (r.includes(id) ? r.filter((x) => x !== id) : [...r, id]));
   const [lead, accent, tail] = HERO.title.split(/(Fast, Easy & Affordable)/);
 
-  // The whole hero (picture + search + offer banners) is exactly one screen tall: screen height minus the sticky header.
+  // The whole hero (picture + grocery-list box + offer banners) is exactly one screen tall: screen height minus the sticky header.
   return (
     <section id="home" className="relative isolate h-[calc(100svh-var(--header-h,9rem))] min-h-[24rem] overflow-x-clip text-white">
       <div className="absolute inset-0 -z-10 overflow-hidden bg-[#0c1a13]">
@@ -175,7 +162,7 @@ export default function Hero() {
       </div>
 
       <div className="container-x flex h-full flex-col justify-center pb-[3vh]">
-        {/* text + search take whatever height is left above the banners */}
+        {/* text + list box take whatever height is left above the banners */}
         <div className="relative z-20 flex shrink-0 flex-col items-center py-1 text-center">
           <p className="font-display text-[11px] uppercase tracking-[0.42em] text-white md:text-sm">Freshly Grocery</p>
           <h1 className="mt-[1.2vh] max-w-4xl font-hero text-[clamp(1.9rem,min(9vw,6.4vh),4.5rem)] font-semibold leading-[1.08] tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,.55)]">
@@ -187,26 +174,7 @@ export default function Hero() {
           <p className="hidden max-w-xl font-hero text-lg italic text-white sm:block md:text-[clamp(1.1rem,3vh,1.5rem)] [@media(max-height:760px)]:!hidden">{HERO.text}</p>
 
           <div className="mt-[2vh] w-full max-w-2xl">
-            <div className="flex items-center gap-2 rounded-2xl border border-accent/50 bg-white/10 p-1.5 shadow-2xl backdrop-blur-xl">
-              <div className="relative min-w-0 flex-1" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setTimeout(() => setQ(""), 150); }}>
-                <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && showAll()} placeholder="Search products, brands, categories" aria-label="Search" className="w-full rounded-xl bg-transparent py-2.5 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/60" />
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/70" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
-                {term && (
-                  <div onMouseDown={(e) => e.preventDefault()} className="absolute inset-x-0 top-full z-30 mt-3 rounded-xl bg-white p-2 text-left text-ink shadow-2xl">
-                    {others.map((o) => <button key={o.type + o.name} onMouseDown={(e) => e.preventDefault()} onClick={() => { if (o.type === "category") router.push(`/category/${o.id}`); else setPick(o); setQ(""); }} className="block w-full rounded px-2 py-1.5 text-left text-sm text-ink/80 hover:bg-primary-light">{o.name} <span className="text-xs text-ink/50">· {o.type === "brand" ? "Brand" : "Category"}</span></button>)}
-                    {products.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between gap-2 px-2 py-1.5 text-sm">
-                        <span className="flex min-w-0 items-center gap-2"><Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label={p.name} className="h-9 w-9 shrink-0 rounded" /><span className="truncate">{p.name}</span> <b className="text-primary">{money(p.price)}</b></span>
-                        <QuantityControl product={p} />
-                      </div>
-                    ))}
-                    {(products.length > 0 || others.length > 0) && <button onMouseDown={(e) => e.preventDefault()} onClick={showAll} className="mt-1 block w-full border-t px-2 py-2 text-left text-xs font-semibold text-primary">See all results for “{q.trim()}” →</button>}
-                    {!products.length && !others.length && <p className="p-3 text-sm text-ink/60">No match. Try a different word.</p>}
-                  </div>
-                )}
-              </div>
-              <a href="#categories" className="whitespace-nowrap rounded-xl bg-cream px-5 py-2.5 text-sm font-bold text-primary transition hover:bg-white md:px-7">Shop now</a>
-            </div>
+            <HeroListBox />
           </div>
         </div>
 
@@ -221,8 +189,6 @@ export default function Hero() {
         </div>
       </div>
       {open && <CollectionModal key={open.id} open onClose={() => setOpen(null)} title={open.title} products={all.filter((p) => open.cats.includes(p.category))} />}
-      {results && <CollectionModal key={results.title} open onClose={() => setResults(null)} title={results.title} products={results.list} />}
-      {pick && <CollectionModal key={pick.name} open onClose={() => setPick(null)} title={pick.name} subs={pick.type === "brand" ? [...new Set(all.filter((p) => p.brand === pick.name).map((p) => p.sub))] : categories.find((c) => c.id === pick.id).subs} products={pick.type === "brand" ? all.filter((p) => p.brand === pick.name) : all.filter((p) => p.category === pick.id)} />}
     </section>
   );
 }

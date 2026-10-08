@@ -7,6 +7,7 @@ import { buildSlots } from "@/lib/delivery";
 import { lineTotal, maxQty, qtyLabel, stepOf } from "@/lib/format";
 import { computeTotals } from "@/lib/pricing";
 import { burstFromElement } from "@/lib/confetti";
+import { setWishPrice } from "@/lib/notify";
 
 const CartContext = createContext(null);
 export const useCart = () => useContext(CartContext);
@@ -95,6 +96,14 @@ export function CartProvider({ children }) {
     if (ok.length < list.length) notify(`${list.length - ok.length} out-of-stock ${label} skipped`);
     setDrawerOpen(true);
   }, "Please log in to add these to your cart.");
+  // entries = [{ p, qty }]: add exact quantities (smart list, recipe with servings, basket suggestions). Logs in once, skips out-of-stock.
+  const addLines = (entries, el = null) => gate(() => {
+    const ok = entries.filter((e) => e.p && e.p.status !== "out" && e.qty > 0);
+    if (ok.length && el?.isConnected) burstFromElement(el, true);
+    ok.forEach(({ p, qty }) => setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + qty, maxQty(p))));
+    if (ok.length < entries.length) notify(`${entries.length - ok.length} unavailable item${entries.length - ok.length > 1 ? "s" : ""} skipped`);
+    setDrawerOpen(true);
+  }, "Please log in to add these to your cart.");
   const reorder = (order, el = null) => gate(() => {
     let skipped = 0;
     order.items.forEach((i) => {
@@ -112,6 +121,7 @@ export function CartProvider({ children }) {
   const toggleWish = (id) => gate(async () => {
     const on = !wishlist.some((w) => String(w) === String(id));
     setWishlist((w) => (on ? [...w, id] : w.filter((x) => String(x) !== String(id))));
+    setWishPrice(id, on ? cat.getProduct(id)?.price ?? null : null);
     try { setWishlist(await api.setWishlisted(id, on)); } catch (e) { setWishlist((w) => (on ? w.filter((x) => String(x) !== String(id)) : [...w, id])); notify(e.message || "Could not update wishlist"); }
   }, "Please log in to save items to your wishlist.");
 
@@ -168,7 +178,7 @@ export function CartProvider({ children }) {
     subscribed, toggleSub, subst, setSubst, coupon, setCoupon, applyCoupon,
     totals, subtotal: totals.subtotal, savings: totals.savings,
     buyNow, startBuyNow, setBuyNowQty, closeBuyNow: () => setBuyNow(null), checkoutLines, checkoutTotals,
-    setQty, add, addMany, reorder, toggleWish, markViewed, openProduct, quick, closeProduct: () => setQuick(null),
+    setQty, add, addMany, addLines, reorder, toggleWish, markViewed, openProduct, quick, closeProduct: () => setQuick(null),
     placeOrder, notify, toast,
   };
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

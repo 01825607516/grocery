@@ -103,3 +103,9 @@ Payment gateway for bKash / Nagad / Card (return `paymentUrl`), SMS/OTP, subscri
 - `POST /orders/:id/cancel` (login required) -> the updated order with `status: "cancelled"`. Allowed only while status is `confirmed` or `preparing`; otherwise 422 `{message: "This order is already packed and cannot be cancelled. Please call us."}`.
 - `POST /orders/:id/return` body `{ reason, note? }` (login required) -> the updated order with `returnRequest: { reason, note, at }`. Only for `delivered` orders, one request per order (409 if repeated, 422 if reason is empty).
 - Payment gateway redirect: after online payment the gateway must send the shopper to `/payment/success?order=ORD-123456`, `/payment/fail?order=...` or `/payment/cancel?order=...` on the frontend.
+
+## Added with the smart features (all optional)
+- **Products**: an optional `soldToday` number per product. When present, the home row becomes "Most bought today" sorted by it.
+- **Price alerts**: `POST /products/:id/price-alert` and `DELETE /products/:id/price-alert` (the UI keeps these per browser until the API exists). Back-in-stock keeps using `POST /products/:id/notify`.
+- **Recipes**: `GET /recipes` shape is unchanged. Smart search, "Complete your meal" in the cart and the recipe servings stepper all read it.
+- Smart grocery list words (Banglish / Bangla -> product words) live in `src/lib/shopping.js` (`ALIAS`).

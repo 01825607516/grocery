@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -6,7 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { money, qtyLabel, stepOf, maxQty } from "@/lib/format";
 import Art from "@/components/ui/Art";
+import SoundToggle from "@/components/ui/SoundToggle";
 import DeliveryPicker from "./DeliveryPicker";
+import CompleteBasket from "./CompleteBasket";
 import CheckoutModal from "./CheckoutModal";
 
 const Row = ({ k, v, neg, free }) => <div className="flex justify-between text-sm"><span>{k}</span><span className={neg || free ? "text-primary" : ""}>{free ? "Free" : <>{neg ? "−" : ""}{money(v)}</>}</span></div>;
@@ -32,6 +34,7 @@ export default function CartDrawer() {
       <aside className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-cream shadow-2xl transition-transform duration-300 ${drawerOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between border-b border-accent/30 p-4">
           <h3 className="font-display text-xl font-semibold">Your cart</h3>
+          <span className="ml-auto mr-3"><SoundToggle /></span>
           <button onClick={() => setDrawerOpen(false)} aria-label="Close cart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
         </div>
         {!lines.length ? <p className="p-10 text-center text-ink/60">Your cart is empty. Add something fresh.</p> : (
@@ -58,6 +61,7 @@ export default function CartDrawer() {
                 {p.subscribable && <label className="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" checked={subscribed.includes(p.id)} onChange={() => toggleSub(p.id)} /> Subscribe & save {cfg.subscribePct}%</label>}
               </div>
             ))}
+            <CompleteBasket compact />
             <DeliveryPicker />
             <div className="rounded-xl bg-white p-3 text-sm">
               {coupon ? (

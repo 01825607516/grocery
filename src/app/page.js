@@ -10,6 +10,7 @@ import Recommendations from "@/components/sections/Recommendations";
 import SmartShopping from "@/components/sections/SmartShopping";
 import MiniCart from "@/components/cart/MiniCart";
 import CartDrawer from "@/components/cart/CartDrawer";
+import SmartListModal from "@/components/list/SmartListModal";
 
 // One long page. Scroll and you see every section in order; click a nav link and it scrolls to that section.
 // Each section is compact enough to fit in one screen, with the same clear gap (py-6 / md:py-8 + a thin line) above and below,
@@ -38,6 +39,7 @@ export default function Home() {
       <Footer />
       <MiniCart />
       <CartDrawer />
+      <SmartListModal />
     </>
   );
 }

@@ -26,7 +26,7 @@ export default function AccountModal() {
   return (
     <Modal open={accountOpen} onClose={() => setAccountOpen(false)} title="My account" z="z-[70]">
       <div className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-white p-4">
-        <div><p className="font-semibold">{user.name}</p><p className="text-sm text-ink/60">{user.email}</p></div>
+        <div><p className="font-semibold">{user.name}</p><p className="text-sm text-ink/60">{user.email || user.phone}</p></div>
         <button onClick={logout} className="rounded-lg border border-primary px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary-light">Log out</button>
       </div>
       <div className="mb-5 grid grid-cols-2 gap-2">

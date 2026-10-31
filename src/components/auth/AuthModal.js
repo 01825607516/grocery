@@ -2,15 +2,16 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { useAuth } from "@/context/AuthContext";
-import { isEmail } from "@/lib/format";
+import { parseIdentifier } from "@/lib/format";
 
 const INPUT = "w-full rounded-lg border border-accent/40 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary";
 
 // Login / Register popup. Opened whenever a guest tries to add, wishlist or check out.
+// Email OR mobile number, for both login and register. No OTP: the account is created and logged in at once.
 export default function AuthModal() {
   const { authOpen, closeAuth, reason, login, register } = useAuth();
   const [mode, setMode] = useState("login");
-  const [f, setF] = useState({ name: "", email: "", password: "" });
+  const [f, setF] = useState({ name: "", identifier: "", password: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (authOpen) { setErr(""); setBusy(false); } }, [authOpen]);
@@ -19,10 +20,12 @@ export default function AuthModal() {
   const submit = async (e) => {
     e.preventDefault(); setErr("");
     if (mode === "register" && !f.name.trim()) return setErr("Please enter your name.");
-    if (!isEmail(f.email)) return setErr("Enter a valid email address, e.g. name@example.com.");
+    const id = parseIdentifier(f.identifier);
+    if (!id) return setErr("Enter a valid email address or mobile number, e.g. name@example.com or 01712345678.");
     if (f.password.length < 6) return setErr("Password must be at least 6 characters.");
     setBusy(true);
-    try { await (mode === "login" ? login({ email: f.email, password: f.password }) : register({ name: f.name, email: f.email, password: f.password })); }
+    const who = { identifier: id.value, [id.type]: id.value }; // e.g. { identifier, email } or { identifier, phone }
+    try { await (mode === "login" ? login({ ...who, password: f.password }) : register({ ...who, name: f.name, password: f.password })); }
     catch (x) { setErr(x.message || "Something went wrong. Please try again."); }
     finally { setBusy(false); }
   };
@@ -32,7 +35,7 @@ export default function AuthModal() {
       <p className="mb-4 text-sm text-ink/70">{reason || "Browse as a guest anytime. Log in to add items, save favourites and order."}</p>
       <form onSubmit={submit} className="space-y-3" noValidate>
         {mode === "register" && <input value={f.name} onChange={set("name")} autoComplete="name" placeholder="Full name" aria-label="Full name" className={INPUT} />}
-        <input value={f.email} onChange={set("email")} type="email" inputMode="email" autoComplete="email" placeholder="Email address" aria-label="Email address" className={INPUT} />
+        <input value={f.identifier} onChange={set("identifier")} type="text" inputMode="email" autoComplete="username" placeholder="Email or mobile number" aria-label="Email or mobile number" className={INPUT} />
         <input value={f.password} onChange={set("password")} type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Password (min 6 characters)" aria-label="Password" className={INPUT} />
         {err && <p role="alert" className="text-sm text-red-600">{err}</p>}
         <button disabled={busy} className="btn w-full">{busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}</button>

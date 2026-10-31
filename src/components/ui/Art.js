@@ -9,7 +9,8 @@ const tint = (hex, a) => {
   return `#${f(n >> 16)}${f((n >> 8) & 255)}${f(n & 255)}`;
 };
 
-export default function Art({ src = "", fallback = "", color = "#4fa86b", className = "", label = "", round = false }) {
+export default function Art({ src = "", fallback = "", color = "#4fa86b", className = "", label: rawLabel = "", round = false }) {
+  const label = String(rawLabel ?? ""); // Dokani can send a null name: never call .replace on null
   const [tries, setTries] = useState(0); // 0 = src, 1 = fallback, 2 = placeholder tile
   const urls = [src, fallback].filter(Boolean);
   const bad = tries >= urls.length;

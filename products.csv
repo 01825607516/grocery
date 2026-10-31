@@ -1,0 +1,12 @@
+name	category	unit	brand	mrp	price	buy_price	stock	low_stock_at	description	expiry_date	image
+Red Onion	Vegetables	kg			60		10		Fresh red onion		images/red-onion.png
+Tomato	Vegetables	kg			50		10		Fresh tomato		images/tomato.png
+Carrot	Vegetables	kg			70		10		Fresh carrot		images/carrot.png
+Jute Leaves (Pat Shak)	Vegetables	kg			50		10		Fresh leafy greens		images/jute-leaves-pat-shak.png
+Farm Eggs (Brown)	Dairy & Eggs	Piece			65		10		Fresh brown eggs		images/eggs-brown.png
+Fresh Instant Milk Powder	Dairy	Piece	Fresh		90		10		Instant full cream milk powder		images/fresh-milk-powder.png
+Alin Muffin Cake Chocolate	Sweets & Chocolate	Piece	Alin		100		10		Chocolate flavour plain muffin cake		images/alin-muffin-cake.png
+Dan Cake Chocolate Layer Cake (12 pack)	Snacks	Piece	Dan Cake		10		10		Creamy and yummy chocolate layer cake - box of 12		images/dan-cake-chocolate-layer.png
+Pokka Sencha Green Tea	Drinks	Piece	Pokka		40		10		Japanese style sencha green tea drink		images/pokka-sencha-green-tea.png
+Plum BodyLovin Vanilla Vibes Body Lotion 400ml	Beauty & Skin Care	Piece	Plum BodyLovin		70		10		"Ceramide blend, murumuru butter, macadamia nut oil"		images/plum-bodylovin-vanilla-vibes-lotion.png
+Sunsilk Smooth & Manageable Shampoo	Hygiene & Personal Care	Piece	Sunsilk		1000		10		Shampoo with argan oil jojoba oil and vitamin E		images/sunsilk-smooth-manageable-shampoo.png

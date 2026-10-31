@@ -13,8 +13,11 @@ export default function ShopByCategory() {
   const { categories: CATEGORIES, products: PRODUCTS } = useCatalog();
   const COUNTS = useMemo(() => Object.fromEntries(CATEGORIES.map((c) => [c.id, PRODUCTS.filter((p) => p.category === c.id).length])), [CATEGORIES, PRODUCTS]);
   const [page, setPage] = useState(1);
-  const pages = Math.ceil(CATEGORIES.length / PER_PAGE);
-  const list = CATEGORIES.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const orderedCategories = useMemo(() => [...CATEGORIES].sort((a, b) =>
+    Number(!a.image?.startsWith("/categories/")) - Number(!b.image?.startsWith("/categories/"))
+  ), [CATEGORIES]);
+  const pages = Math.ceil(orderedCategories.length / PER_PAGE);
+  const list = orderedCategories.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <section className="container-x">

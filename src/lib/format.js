@@ -11,3 +11,11 @@ export const isPhone = (v) => /^(?:\+?88)?01[3-9]\d{8}$/.test(String(v).replace(
 export const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim());
 export const cleanEmail = (v) => String(v || "").trim().toLowerCase();
 export const cleanPhone = (v) => String(v).replace(/[\s-]/g, "").replace(/^\+?88/, "");
+// Login / register accept ONE field: an email OR a Bangladeshi mobile number.
+// Returns { type: "email" | "phone", value } (value is normalised), or null if it is neither.
+export const parseIdentifier = (v) => {
+  const raw = String(v || "").trim();
+  if (isEmail(raw)) return { type: "email", value: cleanEmail(raw) };
+  if (isPhone(raw)) return { type: "phone", value: cleanPhone(raw) };
+  return null;
+};

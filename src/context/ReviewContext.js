@@ -11,23 +11,23 @@ export function ReviewProvider({ children }) {
 
   useEffect(() => {
     let on = true;
-    api.getReviews().then((m) => on && setMap(m || {})).catch(() => {});
+    api.getReviews().then((m) => on && setMap(m && typeof m === "object" && !Array.isArray(m) ? m : {})).catch(() => {});
     return () => { on = false; };
   }, []);
 
-  const load = useCallback((id) => api.getReviews(id).then((list) => setMap((m) => ({ ...m, [id]: list }))).catch(() => {}), []);
+  const load = useCallback((id) => api.getReviews(id).then((list) => Array.isArray(list) && setMap((m) => ({ ...m, [id]: list }))).catch(() => {}), []);
   const summary = useCallback((p) => summarize(map[p.id], p), [map]);
   // one review per customer per product: posting again updates the old one. Throws ApiError (login needed, bad rating...)
   const submit = useCallback(async (p, body) => {
     const r = await api.addReview(p.id, body);
-    setMap((m) => ({ ...m, [p.id]: [r, ...(m[p.id] ?? p.reviews ?? []).filter((x) => x.id !== r.id)] }));
+    setMap((m) => ({ ...m, [p.id]: [r, ...(Array.isArray(m[p.id]) ? m[p.id] : Array.isArray(p.reviews) ? p.reviews : []).filter((x) => x.id !== r.id)] }));
     return r;
   }, []);
 
   // "Helpful" vote (login needed). Throws ApiError.
   const vote = useCallback(async (p, review) => {
     const r = await api.voteReview(p.id, review.id);
-    setMap((m) => ({ ...m, [p.id]: (m[p.id] ?? p.reviews ?? []).map((x) => (x.id === r.id ? { ...x, ...r } : x)) }));
+    setMap((m) => ({ ...m, [p.id]: (Array.isArray(m[p.id]) ? m[p.id] : Array.isArray(p.reviews) ? p.reviews : []).map((x) => (x.id === r.id ? { ...x, ...r } : x)) }));
     return r;
   }, []);
 

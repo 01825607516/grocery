@@ -7,7 +7,7 @@ export class ApiError extends Error {
 
 // Thin fetch wrapper: JSON in/out, Bearer token, normalised errors.
 // A 401 on an authenticated call fires "gs:auth-expired" so the app can log the user out and show the login popup.
-export async function http(path, { method = "GET", body, auth = true, query } = {}) {
+export async function http(path, { method = "GET", body, auth = true, query, base = API_URL } = {}) {
   const qs = query ? "?" + new URLSearchParams(Object.entries(query).filter(([, v]) => v != null)).toString() : "";
   const headers = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -16,7 +16,7 @@ export async function http(path, { method = "GET", body, auth = true, query } = 
 
   let res;
   try {
-    res = await fetch(`${API_URL}${path}${qs}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+    res = await fetch(`${base}${path}${qs}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
   } catch {
     throw new ApiError("Network error. Please check your connection and try again.");
   }

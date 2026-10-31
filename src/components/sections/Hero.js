@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { HERO } from "@/lib/data";
 import { useCatalog } from "@/context/CatalogContext";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/services";
 import CollectionModal from "@/components/product/CollectionModal";
 import { CountText, endOfWeekend } from "@/components/ui/Ticker";
 import HeroListBox from "@/components/list/HeroListBox";
@@ -38,14 +40,14 @@ const RIBBON = "polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)"; // ribbon 
 // ONE wide "Dhamaka" banner. The OUTLINE ITSELF is not a rectangle:
 //   a rounded pill (photo curves with its left end) + a spiky starburst in the middle that bursts out above and below the pill.
 //   [offer photo]  [starburst: offer name, BIG words, UPTO x% OFF + date ribbon hanging on the bottom edge]  [ONE button]
-function OfferBanner({ offer, off, reminded, onShop, onRemind }) {
+function OfferBanner({ offer, off, reminded, onShop, onRemind, labels = {} }) {
   const live = offer.kind === "weekend";
   // live offers say "BIG SALE", coming-soon ones say "MEGA OFFER" (or set `tag: "FLASH DEAL"` on the offer)
   const words = (offer.tag || (live ? "BIG SALE" : "MEGA OFFER")).toUpperCase().split(" ");
   const tag = words.join(" ");
   const rest = words.slice(1).join(" ");
   const big = tag.length > 9 ? "text-[1.7rem] md:text-[2.3rem]" : "text-[2.1rem] md:text-[2.9rem]"; // longer words = smaller, so they stay inside the burst
-  const target = live ? endOfWeekend : () => offerStart(offer);
+  const target = live ? (offer.endsAt ? () => Date.parse(offer.endsAt) : endOfWeekend) : () => offerStart(offer);
   return (
     <article className="relative isolate flex flex-col rounded-[2rem] text-white shadow-[0_12px_30px_rgba(0,0,0,.4)] md:h-[8.75rem] md:flex-row md:rounded-full">
       {/* PILL: glow + golden rays + the photo, all clipped to the rounded pill (so the photo follows the curved left end) */}
@@ -60,7 +62,7 @@ function OfferBanner({ offer, off, reminded, onShop, onRemind }) {
       {/* status chip on the photo */}
       <span className={`absolute left-7 top-3 z-10 hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider shadow md:flex ${live ? "bg-[#d41f2a] text-white" : "bg-white text-[#b3121b]"}`}>
         {live && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-80" /><span className="relative inline-flex h-2 w-2 rounded-full bg-accent" /></span>}
-        {live ? "Live now" : "Coming soon"}
+        {live ? (labels.live_now_label || "Live now") : (labels.coming_soon_label || "Coming soon")}
       </span>
 
       {/* CENTRE: starburst that sticks out of the pill (top and bottom) + text + ribbon */}
@@ -75,24 +77,24 @@ function OfferBanner({ offer, off, reminded, onShop, onRemind }) {
           <p className={`whitespace-nowrap font-body font-black italic leading-[1.02] ${big}`}>
             <span className="text-white" style={OUTLINE}>{words[0]}</span>{rest && <>{" "}<span className="text-[#ffd93d]" style={OUTLINE}>{rest}</span></>}
           </p>
-          {off > 0 && <p className="-rotate-2 font-body text-xs font-black italic leading-none text-white md:text-base"><span style={OUTLINE}>upto</span> <span className="text-[1.6rem] text-[#ffd93d] md:text-[2.3rem]" style={OUTLINE}>{off}%</span> <span style={OUTLINE}>OFF</span></p>}
+          {off > 0 && <p className="-rotate-2 font-body text-xs font-black italic leading-none text-white md:text-base"><span style={OUTLINE}>{labels.up_to_label || "upto"}</span> <span className="text-[1.6rem] text-[#ffd93d] md:text-[2.3rem]" style={OUTLINE}>{off}%</span> <span style={OUTLINE}>{labels.off_label || "OFF"}</span></p>}
         </div>
         {/* date ribbon hanging over the bottom edge (desktop; on phones the countdown sits in the bottom bar) */}
         <p className="absolute -bottom-2 left-1/2 z-10 hidden -translate-x-1/2 -rotate-1 whitespace-nowrap bg-gradient-to-b from-[#ffe45c] to-[#ffb01a] px-8 py-0.5 text-xs font-extrabold uppercase tracking-wider text-[#8f0b13] md:block" style={{ clipPath: RIBBON }}>
-          {live ? "Ends in" : "Starts in"} <CountText className="font-black" getTarget={target} />
+          {live ? (labels.ends_in_label || "Ends in") : (labels.starts_in_label || "Starts in")} <CountText className="font-black" getTarget={target} />
         </p>
       </div>
 
       {/* RIGHT: ONE clear button (on phones: a bottom bar with the countdown) */}
       <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 rounded-b-[2rem] bg-black/25 px-4 py-2 md:w-[11.5rem] md:flex-col md:justify-center md:gap-2 md:rounded-none md:bg-transparent md:py-0 md:pl-2 md:pr-6">
-        <p className="text-[10px] font-bold uppercase tracking-wider md:hidden">{live ? "Ends in" : "Starts in"} <CountText className="font-extrabold text-[#ffd93d]" getTarget={target} /></p>
-        <p className="hidden text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#ffe45c] md:block">{live ? "Hurry up!" : "Don't miss it"}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider md:hidden">{live ? (labels.ends_in_label || "Ends in") : (labels.starts_in_label || "Starts in")} <CountText className="font-extrabold text-[#ffd93d]" getTarget={target} /></p>
+        <p className="hidden text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#ffe45c] md:block">{live ? (labels.hurry_up_label || "Hurry up!") : (labels.dont_miss_label || "Don't miss it")}</p>
         {live ? (
-          <button onClick={onShop} aria-label={`${offer.title} - shop now`} className="group whitespace-nowrap rounded-full bg-[#ffd93d] px-4 py-2 text-sm font-extrabold text-[#2a0a0a] shadow-[0_3px_0_rgba(0,0,0,.3)] transition hover:bg-white md:w-full md:py-2.5">Shop now <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span></button>
+          <button onClick={onShop} aria-label={`${offer.title} - ${labels.shop_now_label || "shop now"}`} className="group whitespace-nowrap rounded-full bg-[#ffd93d] px-4 py-2 text-sm font-extrabold text-[#2a0a0a] shadow-[0_3px_0_rgba(0,0,0,.3)] transition hover:bg-white md:w-full md:py-2.5">{labels.shop_now_label || "Shop now"} <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span></button>
         ) : (
           <button onClick={onRemind} aria-pressed={reminded} aria-label={`${offer.title} - remind me`} className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-2 px-4 py-1.5 text-sm font-extrabold transition md:w-full md:py-2 ${reminded ? "border-white bg-white text-[#b3121b]" : "border-white bg-[#8f0b13]/60 text-white hover:bg-[#8f0b13]"}`}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={reminded ? "" : "origin-top animate-wiggle motion-reduce:animate-none"}><path d={BELL} /></svg>
-            {reminded ? "Reminder set ✓" : "Remind me"}
+            {reminded ? (labels.reminder_set_label || "Reminder set ✓") : (labels.remind_label || "Remind me")}
           </button>
         )}
       </div>
@@ -145,46 +147,64 @@ function OfferSlider({ offers, paused, render }) {
 }
 
 export default function Hero() {
-  const { products: all, offers, config } = useCatalog();
+  const { products: all, offers, config, siteContent } = useCatalog();
+  const heroContent = { ...HERO, ...(siteContent?.hero || {}) };
+  const bannerCopy = siteContent?.banner || {};
+  const heroListContent = siteContent?.hero_list || {};
   const [open, setOpen] = useState(null);
+  const { user } = useAuth();
   const [reminded, setReminded] = useState([]);
+  // "Remind me" choices saved on the server (L3-14 / L3-15) come back after login; guests and demo offers stay browser-only
+  useEffect(() => {
+    if (!user) return;
+    let live = true;
+    api.getAlerts?.().then((a) => { if (live && a?.offerReminders?.length) setReminded((r) => [...new Set([...r, ...a.offerReminders])]); }).catch(() => {});
+    return () => { live = false; };
+  }, [user]);
   const PERKS = [`Free delivery over ৳${config.freeDeliveryLimit}`, "Fresh every day", "Cash on delivery"];
   const OFFERS = useMemo(() => [...offers.weekend.map((o) => ({ ...o, kind: "weekend" })), ...offers.upcoming.map((o) => ({ ...o, kind: "upcoming" }))], [offers]);
-  const toggle = (id) => setReminded((r) => (r.includes(id) ? r.filter((x) => x !== id) : [...r, id]));
-  const [lead, accent, tail] = HERO.title.split(/(Fast, Easy & Affordable)/);
+  const displayPerks = siteContent?.perks?.length ? siteContent.perks : PERKS;
+  const toggle = (id) => {
+    const on = !reminded.includes(id);
+    const flip = (want) => setReminded((r) => (want ? [...new Set([...r, id])] : r.filter((x) => x !== id)));
+    flip(on);
+    if (user && /^c\d+$/.test(String(id))) api.setOfferRemind?.(id, on)?.catch?.(() => flip(!on)); // real Dokani campaign: save it, undo if the server says no
+  };
+  const [lead, accent, tail] = String(heroContent.title || HERO.title).split(/(Fast, Easy & Affordable)/);
+  const hasAccent = Boolean(accent);
 
   // The whole hero (picture + grocery-list box + offer banners) is exactly one screen tall: screen height minus the sticky header.
   return (
     <section id="home" className="relative isolate h-[calc(100svh-var(--header-h,9rem))] min-h-[24rem] overflow-x-clip text-white">
       <div className="absolute inset-0 -z-10 overflow-hidden bg-[#0c1a13]">
-        <div className="absolute inset-0 scale-105 bg-cover bg-center" style={{ backgroundImage: "url(/images/hero.jpg)", filter: "brightness(.66) saturate(.95)" }} />
+        <div className="absolute inset-0 scale-105 bg-cover bg-center" style={{ backgroundImage: `url("${heroContent.image_url || "/images/hero.jpg"}")`, filter: "brightness(.66) saturate(.95)" }} />
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,26,19,.1) 0%, rgba(10,26,19,.7) 88%), linear-gradient(180deg, rgba(10,26,19,.55) 0%, rgba(10,26,19,.15) 42%, rgba(10,26,19,.8) 100%)" }} />
       </div>
 
       <div className="container-x flex h-full flex-col justify-center pb-[3vh]">
         {/* text + list box take whatever height is left above the banners */}
         <div className="relative z-20 flex shrink-0 flex-col items-center py-1 text-center">
-          <p className="font-display text-[11px] uppercase tracking-[0.42em] text-white md:text-sm">Freshly Grocery</p>
+          <p className="font-display text-[11px] uppercase tracking-[0.42em] text-white md:text-sm">{heroContent.kicker || "Freshly Grocery"}</p>
           <h1 className="mt-[1.2vh] max-w-4xl font-hero text-[clamp(1.9rem,min(9vw,6.4vh),4.5rem)] font-semibold leading-[1.08] tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,.55)]">
-            {lead}<em className="font-medium italic">{accent}</em>{tail}
+            {hasAccent ? <>{lead}<em className="font-medium italic">{accent}</em>{tail}</> : heroContent.title || HERO.title}
           </h1>
           <div className="my-[1.6vh] flex items-center gap-3 text-accent" aria-hidden="true">
             <span className="h-px w-14 bg-gradient-to-r from-transparent to-accent md:w-24" /><span className="h-1.5 w-1.5 rotate-45 bg-accent" /><span className="h-px w-14 bg-gradient-to-l from-transparent to-accent md:w-24" />
           </div>
-          <p className="hidden max-w-xl font-hero text-lg italic text-white sm:block md:text-[clamp(1.1rem,3vh,1.5rem)] [@media(max-height:760px)]:!hidden">{HERO.text}</p>
+          <p className="hidden max-w-xl font-hero text-lg italic text-white sm:block md:text-[clamp(1.1rem,3vh,1.5rem)] [@media(max-height:760px)]:!hidden">{heroContent.text || HERO.text}</p>
 
           <div className="mt-[2vh] w-full max-w-2xl">
-            <HeroListBox />
+            <HeroListBox content={heroListContent} />
           </div>
         </div>
 
         {/* offer banners: one wide banner at a time, auto-sliding, at the bottom of the same screen */}
         <div id="offers" className="relative z-10 mx-auto mt-[max(1.25rem,3.5vh)] w-full max-w-[60rem] shrink-0 pb-1.5 pt-1">
           <OfferSlider offers={OFFERS} paused={!!open} render={(o) => (
-            <OfferBanner offer={o} off={o.off ?? bestOff(o, all)} reminded={reminded.includes(o.id)} onShop={() => setOpen(o)} onRemind={() => toggle(o.id)} />
+            <OfferBanner offer={o} off={o.off ?? bestOff(o, all)} labels={bannerCopy} reminded={reminded.includes(o.id)} onShop={() => setOpen(o)} onRemind={() => toggle(o.id)} />
           )} />
           <ul className="hidden flex-wrap items-center justify-center gap-x-8 gap-y-1 pt-2 [@media(max-height:760px)]:!hidden text-[10px] font-medium uppercase tracking-[0.18em] text-white/90 sm:flex md:text-[11px]">
-            {PERKS.map((t) => <li key={t} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent" />{t}</li>)}
+            {displayPerks.map((t) => <li key={t} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent" />{t}</li>)}
           </ul>
         </div>
       </div>

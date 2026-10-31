@@ -18,7 +18,20 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!tokenStore.get()) return setStatus("guest");
-    api.me().then((u) => { setUser(u); setStatus("authed"); }).catch(() => { tokenStore.clear(); setStatus("guest"); });
+    api.me().then((u) => { setUser(u); setStatus("authed"); }).catch((error) => {
+      // A temporary network/server error must not invalidate a saved login. The real-auth
+      // adapter keeps the last verified profile in localStorage for this bootstrap case.
+      if (error?.status === 401) {
+        tokenStore.clear();
+        setUser(null);
+        setStatus("guest");
+        return;
+      }
+      let cached = null;
+      try { cached = JSON.parse(localStorage.getItem("gs_real_user") || "null"); } catch {}
+      if (cached?.id) { setUser(cached); setStatus("authed"); }
+      else setStatus("guest");
+    });
   }, []);
 
   useEffect(() => {

@@ -20,7 +20,7 @@ export const toProduct = (r) => {
   };
 };
 const toCategory = (r) => ({ id: r.id, name: r.name, subs: r.subs ?? r.subCategories ?? [], image: r.image ?? r.imageUrl ?? "", fallback: r.fallback ?? "", color: r.color });
-const toUser = (u) => ({ id: u.id, name: u.name, email: u.email });
+const toUser = (u) => ({ id: u.id, name: u.name, email: u.email || "", phone: u.phone || "" });
 
 export const httpApi = {
   // reviews ---------------------------------------------------------------------
@@ -28,10 +28,11 @@ export const httpApi = {
   voteReview: (productId, reviewId) => http(`/products/${productId}/reviews/${reviewId}/helpful`, { method: "POST" }),         // toggles your "Helpful" vote -> the updated review
   addReview: (productId, body) => http(`/products/${productId}/reviews`, { method: "POST", body }),                   // body { rating: 1-5, text } -> the saved review
   // auth ---------------------------------------------------------------------
+  // body { name, password, identifier, email | phone }  ->  { token, user }  (email OR mobile number, no OTP step)
   async register(body) { const r = await http("/auth/register", { method: "POST", body, auth: false }); tokenStore.set(r.token); return { token: r.token, user: toUser(r.user) }; },
   async login(body) { const r = await http("/auth/login", { method: "POST", body, auth: false }); tokenStore.set(r.token); return { token: r.token, user: toUser(r.user) }; },
   async me() { return toUser(await http("/auth/me")); },
-  updateProfile: async (body) => toUser(await http("/auth/profile", { method: "PUT", body })),            // body { name } -> user
+  updateProfile: async (body) => toUser(await http("/auth/profile", { method: "PUT", body })),            // body { name, phone? } -> user
   changePassword: (body) => http("/auth/password", { method: "POST", body }),                                 // body { current, next }
   async logout() { try { await http("/auth/logout", { method: "POST" }); } catch {} tokenStore.clear(); },
 

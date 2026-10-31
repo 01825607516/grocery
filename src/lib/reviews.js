@@ -19,10 +19,12 @@ const ago = (t) => {
 // loaded = list fetched for this product (or undefined if not fetched yet); p = the product
 // returns { rating, count, dist: [pct5..pct1], counts: [n5..n1], list }
 export function summarize(loaded, p) {
-  const list = loaded ?? p.reviews ?? [];
+  // only a real array counts as a review list: any other value (e.g. {} from an API) is treated as "no reviews" instead of crashing the page
+  const isLoaded = Array.isArray(loaded);
+  const list = isLoaded ? loaded : Array.isArray(p.reviews) ? p.reviews : [];
   const avg = list.length ? list.reduce((s, r) => s + r.rating, 0) / list.length : 0;
-  const count = loaded ? list.length : (p.reviewCount ?? list.length);
-  const rating = loaded ? avg : (p.rating ?? avg);
+  const count = isLoaded ? list.length : (p.reviewCount ?? list.length);
+  const rating = isLoaded ? avg : (p.rating ?? avg);
   const counts = [5, 4, 3, 2, 1].map((n) => list.filter((r) => Math.round(r.rating) === n).length);
   const dist = counts.map((c) => (list.length ? Math.round((c / list.length) * 100) : 0));
   return { rating: Number(rating) || 0, count, dist, counts, list: list.map((r) => ({ ...r, ts: toMs(r.createdAt), date: r.date ?? ago(r.createdAt) })) };

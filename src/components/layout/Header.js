@@ -15,23 +15,23 @@ import { buildSlots } from "@/lib/delivery";
 const pad = (n) => String(n).padStart(2, "0");
 
 // Live weekend sale + countdown to Saturday 11:59 PM. Sits inside the top bar, next to the delivery area.
-function SaleTicker({ onShop, title }) {
+function SaleTicker({ onShop, title, endsAt, labels = {} }) {
   const [left, setLeft] = useState(null);
   useEffect(() => {
-    const target = endOfWeekend();
+    const target = endsAt ? Date.parse(endsAt) : endOfWeekend();
     const tick = () => setLeft(Math.max(0, Math.floor((target - Date.now()) / 1000)));
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [endsAt]);
   const d = left === null ? 0 : Math.floor(left / 86400);
   const clock = left === null ? "--:--:--" : `${d > 0 ? `${d}d ` : ""}${pad(Math.floor((left % 86400) / 3600))}:${pad(Math.floor((left % 3600) / 60))}:${pad(left % 60)}`;
   return (
     <div className="ml-auto flex min-w-0 items-center gap-x-2 whitespace-nowrap md:gap-x-2.5">
       <span className="relative hidden h-2 w-2 shrink-0 sm:flex"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-70" /><span className="relative inline-flex h-2 w-2 rounded-full bg-accent" /></span>
-      <span className="hidden min-w-0 truncate font-display tracking-wide md:inline"><b className="font-semibold text-white">{title}</b> <span className="text-accent">live</span><span className="px-2 text-accent/60" aria-hidden="true">·</span></span>
-      <span className="shrink-0" role="timer">ends in <b className="font-mono font-semibold tabular-nums text-white">{clock}</b></span>
-      <button onClick={onShop} className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 font-bold text-primary-dark transition hover:bg-white">Shop now →</button>
+      <span className="hidden min-w-0 truncate font-display tracking-wide md:inline"><b className="font-semibold text-white">{title}</b> <span className="text-accent">{labels.live_label || "live"}</span><span className="px-2 text-accent/60" aria-hidden="true">·</span></span>
+      <span className="shrink-0" role="timer">{labels.ends_in_label || "ends in"} <b className="font-mono font-semibold tabular-nums text-white">{clock}</b></span>
+      <button onClick={onShop} className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 font-bold text-primary-dark transition hover:bg-white">{labels.shop_now_label || "Shop now →"}</button>
     </div>
   );
 }
@@ -59,7 +59,7 @@ const NAV = [
   { id: "reorder", label: "Reorder & Recipes" },
 ];
 
-function NavLinks({ active: spy, className = "" }) {
+function NavLinks({ active: spy, className = "", items = NAV }) {
   const ref = useRef(null);
   const onHome = usePathname() === "/";            // on other pages the section links go back to the home page
   const active = onHome ? spy : null;
@@ -71,7 +71,7 @@ function NavLinks({ active: spy, className = "" }) {
   }, [active]);
   return (
     <ul ref={ref} className={`no-scrollbar flex items-center gap-5 font-display text-[15px] tracking-wide lg:gap-4 lg:text-sm xl:gap-7 xl:text-[15px] ${className}`}>
-      {NAV.map((n) => (
+      {items.map((n) => (
         <li key={n.id} className="shrink-0">
           <a href={`${onHome ? "" : "/"}#${n.id}`} aria-current={active === n.id ? "true" : undefined}
             className={`relative block py-1.5 transition after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:bg-accent after:transition-transform after:duration-300 ${active === n.id ? "font-semibold text-primary after:scale-x-100" : "text-ink/70 after:scale-x-0 hover:text-primary hover:after:scale-x-100"}`}>{n.label}</a>
@@ -93,7 +93,11 @@ export default function Header() {
   const active = useView();
   const pathname = usePathname();
   const { area, setArea, wishlist, isWished, count, setDrawerOpen } = useCart();
-  const { areas, products, offers, slots, config } = useCatalog();
+  const { areas, products, offers, slots, config, siteContent, support } = useCatalog();
+  const brandName = siteContent?.brand_name || "Freshly";
+  const phone = support?.phone || siteContent?.phone || "0949324782";
+  const headerCopy = siteContent?.header || {};
+  const navItems = siteContent?.nav?.length ? siteContent.nav : NAV;
   const { user, requireLogin, setAccountOpen } = useAuth();
   const [wishOpen, setWishOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
@@ -115,27 +119,27 @@ export default function Header() {
         <div className="container-x flex items-center gap-x-3 py-1.5 text-xs md:text-[13px]">
           <div className="flex min-w-0 items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-accent" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
-            <label className="sr-only" htmlFor="area">Delivery area</label>
+            <label className="sr-only" htmlFor="area">{headerCopy.area_label || "Delivery area"}</label>
             <select id="area" value={area.id} onChange={(e) => setArea(areas.find((a) => a.id === e.target.value))} className="max-w-[34vw] truncate rounded bg-transparent font-semibold text-cream outline-none sm:max-w-none [&>option]:text-ink">
               {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <span className="hidden whitespace-nowrap text-cream/60 lg:inline">Delivery charge {money(area.charge)}{area.courier ? ` · ${area.eta}` : area.express ? " · Express available" : ""}{nextSlot ? ` · Next slot: ${nextSlot}` : ""}</span>
+            <span className="hidden whitespace-nowrap text-cream/60 lg:inline">{headerCopy.delivery_label || "Delivery charge"} {money(area.charge)}{area.courier ? ` · ${area.eta}` : area.express ? ` · ${headerCopy.express_label || "Express available"}` : ""}{nextSlot ? ` · ${headerCopy.next_slot_label || "Next slot:"} ${nextSlot}` : ""}</span>
           </div>
-          {sale && <SaleTicker title={sale.title} onShop={() => setSaleOpen(true)} />}
-          <a href="tel:0949324782" className={`hidden whitespace-nowrap font-medium tracking-wide text-accent xl:block ${sale ? "" : "ml-auto"}`}>Call 09 4932 4782</a>
+          {sale && <SaleTicker title={sale.title} endsAt={sale.endsAt} labels={headerCopy} onShop={() => setSaleOpen(true)} />}
+          <a href={`tel:${String(phone).replace(/[^\d+]/g, "")}`} className={`hidden whitespace-nowrap font-medium tracking-wide text-accent xl:block ${sale ? "" : "ml-auto"}`}>{headerCopy.call_label || "Call"} {support?.phone_label || siteContent?.phone_label || phone}</a>
         </div>
       </div>
       <div className="container-x flex items-center gap-3 py-3.5 md:gap-5 lg:gap-4">
-        <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary">Freshly<span className="text-accent">.</span></a>
-        <nav aria-label="Page sections" className="mx-auto hidden lg:block"><NavLinks active={active} /></nav>
-        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><HeaderSearch /><IconButton path={HEART} label="Wishlist" count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
-        <IconButton path={BAG} label="Cart" count={count} onClick={() => setDrawerOpen(true)} />
+        <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary">{siteContent?.logo_url ? <img src={siteContent.logo_url} alt={brandName} className="h-9 max-w-36 object-contain" /> : <>{brandName}<span className="text-accent">.</span></>}</a>
+        <nav aria-label={headerCopy.nav_label || "Page sections"} className="mx-auto hidden lg:block"><NavLinks active={active} items={navItems} /></nav>
+        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><HeaderSearch label={headerCopy.search_label || "Search"} /><IconButton path={HEART} label={headerCopy.wishlist_label || "Wishlist"} count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
+        <IconButton path={BAG} label={headerCopy.cart_label || "Cart"} count={count} onClick={() => setDrawerOpen(true)} />
         <HeaderToggles />
-        <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : "Login"} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} /></span>
+        <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : (headerCopy.login_label || "Login")} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} /></span>
       </div>
       {/* phones / small tablets: second row, swipeable */}
-      <nav aria-label="Page sections" className="border-t border-accent/20 lg:hidden">
-        <NavLinks active={active} className="container-x justify-start overflow-x-auto py-1" />
+      <nav aria-label={headerCopy.nav_label || "Page sections"} className="border-t border-accent/20 lg:hidden">
+        <NavLinks active={active} items={navItems} className="container-x justify-start overflow-x-auto py-1" />
       </nav>
       {saleOpen && sale && <CollectionModal open onClose={() => setSaleOpen(false)} title={sale.title} products={products.filter((p) => sale.cats.includes(p.category))} />}
       {wishOpen && <CollectionModal key={wishlist.length} open onClose={() => setWishOpen(false)} title="Your wishlist" products={products.filter((p) => isWished(p.id))} />}

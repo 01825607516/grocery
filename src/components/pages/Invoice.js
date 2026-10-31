@@ -37,7 +37,7 @@ export default function Invoice({ id }) {
           <div className="text-right"><p className="font-display text-2xl font-semibold uppercase tracking-widest">Invoice</p><p className="mt-1">No. <b>{order.id}</b></p><p className="text-ink/60">{fmtDate(order.createdAt)}</p></div>
         </header>
         <section className="grid gap-4 py-5 sm:grid-cols-2">
-          <div><p className="text-xs font-semibold uppercase tracking-widest text-accent-dark">Billed to</p><p className="font-semibold">{user?.name}</p><p className="text-ink/70">{user?.email}</p></div>
+          <div><p className="text-xs font-semibold uppercase tracking-widest text-accent-dark">Billed to</p><p className="font-semibold">{user?.name}</p><p className="text-ink/70">{user?.email || user?.phone}</p></div>
           <div><p className="text-xs font-semibold uppercase tracking-widest text-accent-dark">Deliver to</p><p className="text-ink/80">{order.address.type}, {order.address.line}</p>{order.delivery.areaName && <p className="text-ink/60">{order.delivery.areaName}</p>}</div>
         </section>
         <table className="w-full text-left">

@@ -9,8 +9,11 @@ const PER_PAGE = 8; // 8 logos in one line, the rest on the next pages (dots bel
 // Brand strip just above the footer: only logos (brands with a real logo photo come first), page dots underneath.
 // Click a logo to see that brand's products.
 export default function ShopByBrand() {
-  const { brands, products: PRODUCTS } = useCatalog();
-  const BRANDS = useMemo(() => [...brands.filter((b) => PHOTO_LOGOS.includes(b)), ...brands.filter((b) => !PHOTO_LOGOS.includes(b))], [brands]);
+  const { brands, brandLogos, products: PRODUCTS } = useCatalog();
+  const BRANDS = useMemo(() => {
+    const has = (b) => PHOTO_LOGOS.includes(b) || Boolean(brandLogos?.[b]);
+    return [...brands.filter(has), ...brands.filter((b) => !has(b))];
+  }, [brands, brandLogos]);
   const [brand, setBrand] = useState(null);
   const [page, setPage] = useState(1);
   const pages = Math.ceil(BRANDS.length / PER_PAGE);

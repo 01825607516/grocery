@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { money } from "@/lib/format";
 import { getWishPrice, isPriceWatching, setPriceWatching } from "@/lib/notify";
+import { api } from "@/services";
 import NotifyButton from "./NotifyButton";
 
 // Under each wishlist card: "cheaper than when you saved it", a price-drop alert and (for out-of-stock items) a back-in-stock alert.
@@ -13,7 +14,7 @@ export default function WishExtras({ p }) {
   const [watch, setWatch] = useState(false);
   useEffect(() => { setSaved(getWishPrice(p.id)); setWatch(isPriceWatching(p.id)); }, [p.id]);
   const diff = saved == null ? 0 : Math.round(p.price - saved);
-  const toggle = () => { const next = !watch; setPriceWatching(p.id, next); setWatch(next); notify?.(next ? `We will tell you if ${p.name} gets cheaper` : "Price alert off"); };
+  const toggle = () => { const next = !watch; setPriceWatching(p.id, next); setWatch(next); api.setPriceAlert?.(p.id, next).catch(() => {}); notify?.(next ? `We will tell you if ${p.name} gets cheaper` : "Price alert off"); };
   return (
     <div className="mt-2 flex flex-col items-center gap-1.5 text-center text-xs">
       {saved != null && (diff === 0

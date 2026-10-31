@@ -62,7 +62,9 @@ export default function ShopView({ category = null }) {
       (!sub || p.sub === sub) && (!brands.length || brands.includes(p.brand)) &&
       (isNaN(lo) || p.price >= lo) && (isNaN(hi) || p.price <= hi) &&
       (!inStock || p.status !== "out") && (!offersOnly || p.discount > 0));
-    return SORT_FN[sort] ? [...out].sort(SORT_FN[sort]) : out;
+    return SORT_FN[sort]
+      ? [...out].sort((a, b) => Number(a.status === "out") - Number(b.status === "out") || SORT_FN[sort](a, b))
+      : out;
   }, [scope, categories, q, sub, brands.join(","), min, max, sort, inStock, offersOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dishes = useMemo(() => (q ? recipeHits(q, recipes, byName).slice(0, 2) : []), [q, recipes, byName]);

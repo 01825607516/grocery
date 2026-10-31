@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCatalog } from "@/context/CatalogContext";
 import { api } from "@/services";
+import { cleanPhone, isPhone } from "@/lib/format";
 
 const INPUT = "w-full rounded-lg border border-accent/40 bg-white p-2 text-sm outline-none focus:border-primary";
 const Card = ({ title, children }) => <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"><h3 className="mb-3 font-display text-lg font-semibold">{title}</h3>{children}</section>;
@@ -13,19 +14,32 @@ const Note = ({ ok, children }) => children ? <p role={ok ? "status" : "alert"} 
 function Profile() {
   const { user, refreshUser } = useAuth();
   const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email || "");
+  const [phone, setPhone] = useState(user.phone || "");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState({ ok: true, t: "" });
   const save = async () => {
+    const normalizedPhone = phone.trim() ? cleanPhone(phone.trim()) : "";
+    const normalizedEmail = email.trim();
+    if (normalizedEmail && !/^\S+@\S+\.\S+$/.test(normalizedEmail)) return setMsg({ ok: false, t: "Enter a valid email address." });
+    if (phone.trim() && !isPhone(normalizedPhone)) return setMsg({ ok: false, t: "Enter a valid Bangladeshi mobile number." });
+    if (!normalizedEmail && !normalizedPhone && !user.phone) return setMsg({ ok: false, t: "Add an email or mobile number to your account." });
     setBusy(true); setMsg({ ok: true, t: "" });
-    try { await api.updateProfile({ name }); await refreshUser(); setMsg({ ok: true, t: "Profile saved." }); } catch (e) { setMsg({ ok: false, t: e.message || "Could not save." }); } finally { setBusy(false); }
+    try {
+      const update = { name: name.trim(), email: normalizedEmail || null };
+      if (normalizedPhone) update.phone = normalizedPhone;
+      await api.updateProfile(update); await refreshUser(); setMsg({ ok: true, t: "Profile saved." });
+    } catch (e) { setMsg({ ok: false, t: e.message || "Could not save." }); } finally { setBusy(false); }
   };
   return (
     <Card title="Profile">
       <label className="mb-1 block text-xs text-ink/60">Full name</label>
       <input value={name} onChange={(e) => setName(e.target.value)} className={INPUT} />
-      <label className="mb-1 mt-3 block text-xs text-ink/60">Email</label>
-      <input value={user.email} disabled className={`${INPUT} bg-cream text-ink/60`} />
-      <button onClick={save} disabled={busy || !name.trim() || name.trim() === user.name} className="btn mt-4 !py-1.5">{busy ? "Saving…" : "Save changes"}</button>
+      <label className="mb-1 mt-3 block text-xs text-ink/60">Email for back-in-stock alerts</label>
+      <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" className={INPUT} />
+      <label className="mb-1 mt-3 block text-xs text-ink/60">Mobile number</label>
+      <input type="tel" autoComplete="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01XXXXXXXXX" className={INPUT} />
+      <button onClick={save} disabled={busy || !name.trim()} className="btn mt-4 !py-1.5">{busy ? "Saving…" : "Save changes"}</button>
       <Note ok={msg.ok}>{msg.t}</Note>
     </Card>
   );
@@ -106,7 +120,7 @@ export default function AccountView() {
     <div className="grid gap-5 lg:grid-cols-2">
       <div className="space-y-5">
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5">
-          <div><p className="font-display text-lg font-semibold">{user.name}</p><p className="text-sm text-ink/60">{user.email}</p></div>
+          <div><p className="font-display text-lg font-semibold">{user.name}</p><p className="text-sm text-ink/60">{user.email || user.phone}</p></div>
           <button onClick={async () => { await logout(); router.push("/"); }} className="rounded-lg border border-primary px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary-light">Log out</button>
         </div>
         <div className="grid grid-cols-2 gap-3 text-center text-sm font-semibold">

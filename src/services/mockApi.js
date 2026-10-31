@@ -3,7 +3,7 @@
 import { AREAS, BRANDS, CATEGORIES, CONFIG, LAST_ORDER, PAYMENTS, PRODUCTS, RECIPES, SLOTS, UPCOMING_OFFERS, WEEKEND_OFFERS } from "../lib/data";
 import { DEMO_REVIEWS, DEMO_VERSION, buildDemoReviews } from "../lib/demoReviews";
 import { buildSlots, slotDate } from "../lib/delivery";
-import { cleanEmail, isEmail, isPhone, maxQty, lineTotal } from "../lib/format";
+import { parseIdentifier, isPhone, maxQty, lineTotal } from "../lib/format";
 import { ORDER_STEPS } from "../lib/orders";
 import { computeTotals } from "../lib/pricing";
 import { ApiError } from "./http";
@@ -31,17 +31,41 @@ const write = (k, v) => { try { has() ? localStorage.setItem(k, JSON.stringify(v
 const delay = (ms = 120) => new Promise((r) => setTimeout(r, ms));
 const uid = (p) => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const byId = new Map(PRODUCTS.map((p) => [p.id, p]));
+// When products come from Dokani (see src/services/dokani/), tell the mock which products really exist,
+// so its cart / stock / price checks use the Dokani products instead of the built-in demo ones.
+export function setMockProducts(items) { byId.clear(); items.forEach((p) => byId.set(p.id, p)); }
 
 const users = () => read("gs_m_users", []);
+// Logged in through the REAL auth API (NEXT_PUBLIC_AUTH_API)? Cart / wishlist / orders are still mock, so give the mock a matching local user.
+const realUserAsMock = () => {
+  const ru = read("gs_real_user", null);
+  if (!ru || !ru.id) return null;
+  const id = "r" + ru.id;
+  let u = users().find((x) => x.id === id);
+  if (!u) { u = { id, name: ru.name, email: ru.email || "", phone: ru.phone || "", password: "" }; write("gs_m_users", [...users(), u]); }
+  return u;
+};
 const currentUser = () => {
   const t = tokenStore.get();
-  const u = t && t.startsWith("mock.") ? users().find((x) => x.id === t.slice(5)) : null;
+  const u = t && t.startsWith("mock.") ? users().find((x) => x.id === t.slice(5)) : (t ? realUserAsMock() : null);
   if (!u) throw new ApiError("Please log in to continue.", 401);
   return u;
 };
-const publicUser = ({ id, name, email }) => ({ id, name, email });
+const publicUser = ({ id, name, email, phone }) => ({ id, name, email: email || "", phone: phone || "" });
+// accepts { identifier } (new) or { email } / { phone } (old callers)
+const idOf = (b) => parseIdentifier(b.identifier ?? b.email ?? b.phone);
+const sameId = (u, id) => (id.type === "email" ? u.email === id.value : u.phone === id.value);
 const mine = (key, u, d) => read(`gs_m_${key}_${u.id}`, d);
 const save = (key, u, v) => write(`gs_m_${key}_${u.id}`, v);
+const makeSession = (user) => { const token = "mock." + user.id; tokenStore.set(token); return { token, user: publicUser(user) }; };
+// creates the account (+ one demo past order so Quick reorder / recommendations have something to show)
+const makeUser = (name, id, password) => {
+  const user = { id: uid("u"), name: name.trim(), email: id.type === "email" ? id.value : "", phone: id.type === "phone" ? id.value : "", password };
+  write("gs_m_users", [...users(), user]);
+  const items = LAST_ORDER.map((n) => PRODUCTS.find((p) => p.name === n)).filter(Boolean).map((p) => ({ productId: p.id, name: p.name, unit: p.unit, price: p.price, qty: 1, total: p.price }));
+  save("orders", user, [{ id: "ORD-" + String(100000 + Math.floor(Math.random() * 899999)), createdAt: Date.now() - 3 * 864e5, status: "delivered", items, address: { type: "Home", line: "—" }, delivery: { method: "standard", areaId: "dhaka", slot: null, eta: "" }, payment: { method: "Cash on Delivery" }, totals: { total: items.reduce((s, i) => s + i.total, 0) }, sample: true }]);
+  return user;
+};
 
 function withStatus(o) {
   if (o.status === "cancelled") return o;
@@ -102,34 +126,32 @@ export const mockApi = {
     return pubReview(r, u.id);
   },
   // auth
-  async register({ name, email, password }) {
+  // Register with an email OR a mobile number. No OTP / verification: the account is created and logged in at once.
+  async register({ name, password, ...rest }) {
     await delay();
     if (!name?.trim()) throw new ApiError("Please enter your name.", 422);
-    if (!isEmail(email)) throw new ApiError("Enter a valid email address.", 422);
+    const id = idOf(rest);
+    if (!id) throw new ApiError("Enter a valid email address or mobile number.", 422);
     if ((password || "").length < 6) throw new ApiError("Password must be at least 6 characters.", 422);
-    const list = users(); const em = cleanEmail(email);
-    if (list.some((u) => u.email === em)) throw new ApiError("This email is already registered. Please log in.", 409);
-    const user = { id: uid("u"), name: name.trim(), email: em, password };
-    write("gs_m_users", [...list, user]);
-    // demo only: give every new account one past order so Quick reorder / recommendations have something to show
-    const items = LAST_ORDER.map((n) => PRODUCTS.find((p) => p.name === n)).filter(Boolean).map((p) => ({ productId: p.id, name: p.name, unit: p.unit, price: p.price, qty: 1, total: p.price }));
-    save("orders", user, [{ id: "ORD-" + String(100000 + Math.floor(Math.random() * 899999)), createdAt: Date.now() - 3 * 864e5, status: "delivered", items, address: { type: "Home", line: "—" }, delivery: { method: "standard", areaId: "dhaka", slot: null, eta: "" }, payment: { method: "Cash on Delivery" }, totals: { total: items.reduce((s, i) => s + i.total, 0) }, sample: true }]);
-    const token = "mock." + user.id; tokenStore.set(token);
-    return { token, user: publicUser(user) };
+    if (users().some((u) => sameId(u, id))) throw new ApiError(`This ${id.type === "email" ? "email" : "mobile number"} is already registered. Please log in.`, 409);
+    return makeSession(makeUser(name, id, password));
   },
-  async login({ email, password }) {
+  async login({ password, ...rest }) {
     await delay();
-    const u = users().find((x) => x.email === cleanEmail(email) && x.password === password);
-    if (!u) throw new ApiError("Wrong email or password.", 401);
+    const id = idOf(rest);
+    const u = id && users().find((x) => sameId(x, id) && x.password === password);
+    if (!u) throw new ApiError("Wrong email/mobile number or password.", 401);
     const token = "mock." + u.id; tokenStore.set(token);
     return { token, user: publicUser(u) };
   },
   async me() { await delay(60); return publicUser(currentUser()); },
-  async updateProfile({ name }) {
+  async updateProfile({ name, phone }) {
     await delay(80); const u = currentUser();
     if (!String(name || "").trim()) throw new ApiError("Please enter your name.", 422);
-    write("gs_m_users", users().map((x) => (x.id === u.id ? { ...x, name: name.trim() } : x)));
-    return publicUser({ ...u, name: name.trim() });
+    if (phone && !isPhone(phone)) throw new ApiError("Enter a valid Bangladeshi mobile number.", 422);
+    const updated = { ...u, name: name.trim(), ...(phone ? { phone } : {}) };
+    write("gs_m_users", users().map((x) => (x.id === u.id ? updated : x)));
+    return publicUser(updated);
   },
   async changePassword({ current, next }) {
     await delay(100); const u = currentUser();

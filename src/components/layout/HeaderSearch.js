@@ -15,7 +15,7 @@ const TRY = ["Milk", "Egg", "Rice", "Biryani", "Chicken"];
 
 // Search icon in the header -> a search panel drops down from the top.
 // Live suggestions (categories, brands, dish ingredients, products with + / - buttons). Enter = full results popup.
-export default function HeaderSearch() {
+export default function HeaderSearch({ label = "Search" }) {
   const { products: all, brands, categories, recipes, byName } = useCatalog();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -43,9 +43,9 @@ export default function HeaderSearch() {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} aria-label="Search" aria-haspopup="dialog" className="relative flex shrink-0 flex-col items-center text-primary">
+      <button onClick={() => setOpen(true)} aria-label={label} aria-haspopup="dialog" className="relative flex shrink-0 flex-col items-center text-primary">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={SEARCH} /></svg>
-        <span className="hidden font-display text-xs italic md:block lg:hidden xl:block">Search</span>
+        <span className="hidden font-display text-xs italic md:block lg:hidden xl:block">{label}</span>
       </button>
 
       {open && (

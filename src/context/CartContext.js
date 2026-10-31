@@ -7,7 +7,7 @@ import { buildSlots } from "@/lib/delivery";
 import { lineTotal, maxQty, qtyLabel, stepOf } from "@/lib/format";
 import { computeTotals } from "@/lib/pricing";
 import { burstFromElement } from "@/lib/confetti";
-import { setWishPrice } from "@/lib/notify";
+import { setWishPrice, setWatching, setPriceWatching } from "@/lib/notify";
 
 const CartContext = createContext(null);
 export const useCart = () => useContext(CartContext);
@@ -61,7 +61,11 @@ export function CartProvider({ children }) {
         setItems(cart.items || {}); setSubscribed(cart.subscribed || []); setSubst(cart.substitutions || {});
         setWishlist(wish); setOrders(ords); setHydrated(user.id);
       })
-      .catch((e) => live && (notify(e.message || "Could not load your cart."), setHydrated(user.id)));
+      // Keep hydration incomplete after a failed read. Marking an empty in-memory cart
+      // as loaded would let the sync effect overwrite the saved server cart with {}.
+      .catch((e) => live && notify(e.message || "Could not load your cart."));
+    // restore "notify me" / "price alert" choices saved on the server (best effort, only when the real backend has them)
+    api.getAlerts?.().then((a) => { if (!live || !a) return; (a.notify || []).forEach((id) => setWatching(id, true)); (a.priceAlerts || []).forEach((id) => setPriceWatching(id, true)); }).catch(() => {});
     return () => { live = false; };
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 

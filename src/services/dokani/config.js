@@ -13,7 +13,7 @@ export const cfg = () => ({
 export const isEnabled = () => { const c = cfg(); return Boolean(c.baseUrl && c.login && c.password); };
 
 export const TOKEN_TTL_MS = 20 * 60 * 60 * 1000; // refresh a little before the ~22 h token life; a 401 also triggers a fresh login
-export const CATALOG_TTL_MS = 60 * 1000;         // products are re-read from Dokani at most once a minute
+export const CATALOG_TTL_MS = 5 * 60 * 1000;     // cache products for five minutes to stay within Dokani API limits
 export const NEAR_EXPIRY_DAYS = 3;               // expiry_date within 3 days -> "Near Expiry" badge
 
 // Dokani categories are free text ("Drinks", "Rice"). Freshly has a fixed list of category ids (src/lib/data.js).

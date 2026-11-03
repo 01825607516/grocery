@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HERO } from "@/lib/data";
 import { useCatalog } from "@/context/CatalogContext";
 import { useAuth } from "@/context/AuthContext";
+import { localImageUrl } from "@/lib/images";
 import { api } from "@/services";
 import CollectionModal from "@/components/product/CollectionModal";
 import { CountText, endOfWeekend } from "@/components/ui/Ticker";
@@ -40,7 +41,7 @@ const RIBBON = "polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)"; // ribbon 
 // ONE wide "Dhamaka" banner. The OUTLINE ITSELF is not a rectangle:
 //   a rounded pill (photo curves with its left end) + a spiky starburst in the middle that bursts out above and below the pill.
 //   [offer photo]  [starburst: offer name, BIG words, UPTO x% OFF + date ribbon hanging on the bottom edge]  [ONE button]
-function OfferBanner({ offer, off, reminded, onShop, onRemind, labels = {} }) {
+function OfferBanner({ offer, off, reminded, showReminder = true, onShop, onRemind, labels = {} }) {
   const live = offer.kind === "weekend";
   // live offers say "BIG SALE", coming-soon ones say "MEGA OFFER" (or set `tag: "FLASH DEAL"` on the offer)
   const words = (offer.tag || (live ? "BIG SALE" : "MEGA OFFER")).toUpperCase().split(" ");
@@ -91,12 +92,12 @@ function OfferBanner({ offer, off, reminded, onShop, onRemind, labels = {} }) {
         <p className="hidden text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#ffe45c] md:block">{live ? (labels.hurry_up_label || "Hurry up!") : (labels.dont_miss_label || "Don't miss it")}</p>
         {live ? (
           <button onClick={onShop} aria-label={`${offer.title} - ${labels.shop_now_label || "shop now"}`} className="group whitespace-nowrap rounded-full bg-[#ffd93d] px-4 py-2 text-sm font-extrabold text-[#2a0a0a] shadow-[0_3px_0_rgba(0,0,0,.3)] transition hover:bg-white md:w-full md:py-2.5">{labels.shop_now_label || "Shop now"} <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span></button>
-        ) : (
+        ) : showReminder ? (
           <button onClick={onRemind} aria-pressed={reminded} aria-label={`${offer.title} - remind me`} className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-2 px-4 py-1.5 text-sm font-extrabold transition md:w-full md:py-2 ${reminded ? "border-white bg-white text-[#b3121b]" : "border-white bg-[#8f0b13]/60 text-white hover:bg-[#8f0b13]"}`}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={reminded ? "" : "origin-top animate-wiggle motion-reduce:animate-none"}><path d={BELL} /></svg>
             {reminded ? (labels.reminder_set_label || "Reminder set ✓") : (labels.remind_label || "Remind me")}
           </button>
-        )}
+        ) : <span className="text-sm font-semibold text-white">{labels.coming_soon_label || "Coming soon"}</span>}
       </div>
     </article>
   );
@@ -147,7 +148,7 @@ function OfferSlider({ offers, paused, render }) {
 }
 
 export default function Hero() {
-  const { products: all, offers, config, siteContent } = useCatalog();
+  const { products: all, offers, config, siteContent, featureToggles = {} } = useCatalog();
   const heroContent = { ...HERO, ...(siteContent?.hero || {}) };
   const bannerCopy = siteContent?.banner || {};
   const heroListContent = siteContent?.hero_list || {};
@@ -161,7 +162,7 @@ export default function Hero() {
     api.getAlerts?.().then((a) => { if (live && a?.offerReminders?.length) setReminded((r) => [...new Set([...r, ...a.offerReminders])]); }).catch(() => {});
     return () => { live = false; };
   }, [user]);
-  const PERKS = [`Free delivery over ৳${config.freeDeliveryLimit}`, "Fresh every day", "Cash on delivery"];
+  const PERKS = [...(config.freeDeliveryLimit > 0 ? [`Free delivery over ৳${config.freeDeliveryLimit}`] : []), "Fresh every day", "Cash on delivery"];
   const OFFERS = useMemo(() => [...offers.weekend.map((o) => ({ ...o, kind: "weekend" })), ...offers.upcoming.map((o) => ({ ...o, kind: "upcoming" }))], [offers]);
   const displayPerks = siteContent?.perks?.length ? siteContent.perks : PERKS;
   const toggle = (id) => {
@@ -177,7 +178,7 @@ export default function Hero() {
   return (
     <section id="home" className="relative isolate h-[calc(100svh-var(--header-h,9rem))] min-h-[24rem] overflow-x-clip text-white">
       <div className="absolute inset-0 -z-10 overflow-hidden bg-[#0c1a13]">
-        <div className="absolute inset-0 scale-105 bg-cover bg-center" style={{ backgroundImage: `url("${heroContent.image_url || "/images/hero.jpg"}")`, filter: "brightness(.66) saturate(.95)" }} />
+        <div className="absolute inset-0 scale-105 bg-cover bg-center" style={{ backgroundImage: `url("${heroContent.image_url || localImageUrl("/images/hero.jpg")}")`, filter: "brightness(.66) saturate(.95)" }} />
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(10,26,19,.1) 0%, rgba(10,26,19,.7) 88%), linear-gradient(180deg, rgba(10,26,19,.55) 0%, rgba(10,26,19,.15) 42%, rgba(10,26,19,.8) 100%)" }} />
       </div>
 
@@ -194,19 +195,19 @@ export default function Hero() {
           <p className="hidden max-w-xl font-hero text-lg italic text-white sm:block md:text-[clamp(1.1rem,3vh,1.5rem)] [@media(max-height:760px)]:!hidden">{heroContent.text || HERO.text}</p>
 
           <div className="mt-[2vh] w-full max-w-2xl">
-            <HeroListBox content={heroListContent} />
+            {featureToggles.smart_grocery_list !== false && <HeroListBox content={heroListContent} />}
           </div>
         </div>
 
         {/* offer banners: one wide banner at a time, auto-sliding, at the bottom of the same screen */}
-        <div id="offers" className="relative z-10 mx-auto mt-[max(1.25rem,3.5vh)] w-full max-w-[60rem] shrink-0 pb-1.5 pt-1">
-          <OfferSlider offers={OFFERS} paused={!!open} render={(o) => (
-            <OfferBanner offer={o} off={o.off ?? bestOff(o, all)} labels={bannerCopy} reminded={reminded.includes(o.id)} onShop={() => setOpen(o)} onRemind={() => toggle(o.id)} />
-          )} />
-          <ul className="hidden flex-wrap items-center justify-center gap-x-8 gap-y-1 pt-2 [@media(max-height:760px)]:!hidden text-[10px] font-medium uppercase tracking-[0.18em] text-white/90 sm:flex md:text-[11px]">
+        {featureToggles.home_promotions !== false && <div id="offers" className="relative z-10 mx-auto mt-[max(1.25rem,3.5vh)] w-full max-w-[60rem] shrink-0 pb-1.5 pt-1">
+          {OFFERS.length > 0 && <OfferSlider offers={OFFERS} paused={!!open} render={(o) => (
+            <OfferBanner offer={o} off={o.off ?? bestOff(o, all)} labels={bannerCopy} reminded={reminded.includes(o.id)} showReminder={featureToggles.offer_reminders !== false} onShop={() => setOpen(o)} onRemind={() => toggle(o.id)} />
+          )} />}
+          {featureToggles.home_perks !== false && <ul className="hidden flex-wrap items-center justify-center gap-x-8 gap-y-1 pt-2 [@media(max-height:760px)]:!hidden text-[10px] font-medium uppercase tracking-[0.18em] text-white/90 sm:flex md:text-[11px]">
             {displayPerks.map((t) => <li key={t} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-accent" />{t}</li>)}
-          </ul>
-        </div>
+          </ul>}
+        </div>}
       </div>
       {open && <CollectionModal key={open.id} open onClose={() => setOpen(null)} title={open.title} products={all.filter((p) => open.cats.includes(p.category))} />}
     </section>

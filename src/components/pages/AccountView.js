@@ -113,6 +113,7 @@ function Addresses() {
 }
 
 export default function AccountView() {
+  const { featureToggles = {} } = useCatalog();
   const router = useRouter();
   const { user, logout } = useAuth();
   if (!user) return null;
@@ -125,7 +126,7 @@ export default function AccountView() {
         </div>
         <div className="grid grid-cols-2 gap-3 text-center text-sm font-semibold">
           <Link href="/account/orders" className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:bg-primary-light">My orders</Link>
-          <Link href="/wishlist" className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:bg-primary-light">Wishlist</Link>
+          {featureToggles.wishlist !== false && <Link href="/wishlist" className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:bg-primary-light">Wishlist</Link>}
         </div>
         <Profile />
         <Password />

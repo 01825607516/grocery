@@ -8,9 +8,27 @@
 
 export const unsplash = (id, w, h) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 export const flickr = (keyword, lock, w, h) => `https://loremflickr.com/${w}/${h}/${keyword}?lock=${lock}`;
+const GCS_ASSET_BASE = (process.env.NEXT_PUBLIC_GCS_ASSET_BASE || "https://storage.googleapis.com/dokani_storage/freshly-assets").replace(/\/+$/, "");
+export const localImageUrl = (path) => GCS_ASSET_BASE + "/" + String(path || "").split("/").filter(Boolean).join("/");
+const imageSlug = (value) => String(value || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 const UNSPLASH_PRODUCTS = {
  "Tomato": "1587334274535-5f82e7e55dc0"
+};
+
+const PRODUCT_PHOTO_ALIASES = {
+  cashews: "cashew",
+  pistachios: "pistachio",
+};
+
+export const productPhotoPath = (name) => {
+  if (LOCAL_PRODUCT_PHOTOS[name]) return LOCAL_PRODUCT_PHOTOS[name];
+  const normalized = String(name || "").toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:kg|kgs|g|gm|ml|l|pc|pcs|pack|bags?)\b/gi, " ")
+    .replace(/\b(?:whole|roasted|fresh|pure|organic)\b/gi, " ")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `/images/${PRODUCT_PHOTO_ALIASES[normalized] || normalized}.jpg`;
 };
 const UNSPLASH_CATEGORIES = {
  "veg": "1518977822534-7049a61ee0c2"
@@ -278,11 +296,11 @@ const LOCAL_PRODUCT_PHOTOS = {
   "Banana (dozen)": "/products/banana.jpg",
   "Vanilla Cupcakes (4)": "/products/vanilla-cupcakes.jpg",
 };
-export const productImage = (name, id) => (LOCAL_PRODUCT_PHOTOS[name] ? LOCAL_PRODUCT_PHOTOS[name] : UNSPLASH_PRODUCTS[name] ? unsplash(UNSPLASH_PRODUCTS[name], 480, 480) : flickr(PRODUCT_KEYWORDS[name] || "grocery", id, 480, 480));
-export const productFallback = (category, id) => flickr(CATEGORY_KEYWORDS[category] || "grocery", id + 500, 480, 480);
+export const productImage = (name) => localImageUrl(productPhotoPath(name));
+export const productFallback = (category) => localImageUrl(`/images/cat-${imageSlug(category)}.jpg`);
 // The first 8 categories use your own photos from public/categories/<id>.jpg (replace a file to change it).
 const LOCAL_CATEGORY_PHOTOS = ["veg", "fruits", "meat", "dairy", "bakery", "snacks", "drinks", "pantry"];
-export const categoryImage = (id) => (LOCAL_CATEGORY_PHOTOS.includes(id) ? `/categories/${id}.jpg` : UNSPLASH_CATEGORIES[id] ? unsplash(UNSPLASH_CATEGORIES[id], 320, 320) : flickr(CATEGORY_KEYWORDS[id] || "grocery", 900 + id.length, 320, 320));
-export const categoryFallback = (id) => flickr("grocery", 950 + id.length, 320, 320);
-export const bannerImage = (id) => (UNSPLASH_BANNERS[id] ? unsplash(UNSPLASH_BANNERS[id], 1600, 640) : flickr(BANNER_KEYWORDS[id], 77, 1600, 640));
-export const bannerFallback = (id) => flickr("grocery,market", 88, 1600, 640);
+export const categoryImage = (id) => localImageUrl(LOCAL_CATEGORY_PHOTOS.includes(id) ? `/categories/${id}.jpg` : `/images/cat-${imageSlug(id)}.jpg`);
+export const categoryFallback = (id) => localImageUrl(`/images/cat-${imageSlug(id)}.jpg`);
+export const bannerImage = (id) => localImageUrl(`/images/banner-${imageSlug(id)}.jpg`);
+export const bannerFallback = () => localImageUrl("/images/hero.jpg");

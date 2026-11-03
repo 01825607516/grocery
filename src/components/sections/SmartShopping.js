@@ -32,7 +32,7 @@ function PanelHead({ title, hint, children }) {
 function Mosaic({ items, label }) {
   return (
     <div role="img" aria-label={label} className="grid h-14 w-14 shrink-0 grid-cols-2 grid-rows-2 gap-px overflow-hidden rounded-xl bg-accent/30 ring-1 ring-accent/40">
-      {items.slice(0, 4).map((p) => <Art key={p.id} src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label="" className="h-full w-full" />)}
+      {items.slice(0, 4).map((p) => <Art key={p.id} src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-full w-full" />)}
     </div>
   );
 }
@@ -41,7 +41,7 @@ function Mosaic({ items, label }) {
 export default function SmartShopping() {
   const { addLines, orders } = useCart();
   const { user, requireLogin } = useAuth();
-  const { recipes: RECIPES, byName, getProduct, products } = useCatalog();
+  const { recipes: RECIPES, byName, getProduct, products, featureToggles = {} } = useCatalog();
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [openRecipe, setOpenRecipe] = useState(null); // recipe whose ingredient list is expanded
@@ -72,11 +72,10 @@ export default function SmartShopping() {
 
   return (
     <section className="container-x">
-      <SectionHeading title="Reorder & Recipes" />
+      {(featureToggles.buy_again !== false || featureToggles.recipes !== false) && <SectionHeading title={featureToggles.buy_again === false ? "Recipes" : featureToggles.recipes === false ? "Quick reorder" : "Reorder & Recipes"} />}
       <div className="mx-auto grid max-w-5xl items-stretch gap-4 md:grid-cols-2 md:gap-5">
 
-        {/* Quick reorder */}
-        <div className={PANEL}>
+        {featureToggles.buy_again !== false && <div className={PANEL}>
           <PanelHead title="Quick reorder" hint="Tick what you need again. We flag price changes and out-of-stock items" />
           {!user ? (
             <p className="px-5 py-10 text-center text-sm text-ink/60">Log in to see your last order and reorder it in one tap.<br /><button onClick={() => requireLogin(null, "Please log in to see your previous orders.")} className="btn mt-3">Log in</button></p>
@@ -90,7 +89,7 @@ export default function SmartShopping() {
                   return (
                     <li key={p.id} className="flex items-center gap-3 py-2.5">
                       <input type="checkbox" aria-label={`Reorder ${p.name}`} disabled={out && !(swapRe[p.id] && sub)} checked={!off.includes(p.id) && (!out || !!(swapRe[p.id] && sub))} onChange={() => setOff((o) => (o.includes(p.id) ? o.filter((x) => x !== p.id) : [...o, p.id]))} />
-                      <Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label={p.name} className={`h-11 w-11 ${THUMB} ${out ? "opacity-50" : ""}`} />
+                      <Art src={p.image} color={p.color} label={p.name} initialWhenMissing className={`h-11 w-11 ${THUMB} ${out ? "opacity-50" : ""}`} />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-display text-[15px] font-semibold">{p.name}{item.qty !== 1 && <span className="ml-1 text-xs font-normal text-ink/50">× {qtyLabel(p, item.qty)}</span>}</span>
                         {out && <span className="block text-[11px] text-[#e11d2e]">Out of stock{sub ? <> · <button onClick={() => { setSwapRe((m) => ({ ...m, [p.id]: !m[p.id] })); setOff((o) => o.filter((x) => x !== p.id)); }} className="font-semibold text-primary underline">{swapRe[p.id] ? `Using ${sub.name} (undo)` : `Try ${sub.name} · ${money(sub.price)}`}</button></> : ""}</span>}
@@ -107,10 +106,10 @@ export default function SmartShopping() {
               </div>
             </>
           )}
-        </div>
+        </div>}
 
         {/* Recipe to cart */}
-        <div className={PANEL}>
+        {featureToggles.recipes !== false && <div className={PANEL}>
           <PanelHead title="Recipe to cart" hint="Pick a dish, we add every ingredient">
             <input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Search recipe or ingredient" aria-label="Search recipe or ingredient" className="w-full rounded-lg border border-accent/50 bg-white px-3 py-1.5 text-sm outline-none focus:border-primary sm:w-52" />
           </PanelHead>
@@ -163,7 +162,7 @@ export default function SmartShopping() {
             </ul>
           ) : <p className="px-5 py-10 text-center text-sm text-ink/60">No recipe found. Try an ingredient like “egg” or “mango”.</p>}
           {pages > 1 && <div className="mt-auto pb-3"><Pagination page={cur} pages={pages} onChange={setPage} compact /></div>}
-        </div>
+        </div>}
 
       </div>
     </section>

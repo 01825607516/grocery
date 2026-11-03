@@ -19,13 +19,13 @@ import { EmptyState, Row } from "./common";
 export default function CartView() {
   const router = useRouter();
   const { user, requireLogin } = useAuth();
-  const { products } = useCatalog();
+  const { products, featureToggles = {} } = useCatalog();
   const { lines, totals, method, setQty, subscribed, toggleSub, subst, setSubst, cfg, wishlist, isWished, toggleWish, addMany } = useCart();
   const { t } = useI18n();
   const goCheckout = () => (user ? router.push("/checkout") : requireLogin(() => router.push("/checkout"), "Please log in to place your order."));
   const saveForLater = (p) => { if (!isWished(p.id)) toggleWish(p.id); setQty(p.id, 0); };
   const inCart = new Set(lines.map((l) => String(l.product.id)));
-  const saved = products.filter((p) => wishlist.some((w) => String(w) === String(p.id)) && !inCart.has(String(p.id)));
+  const saved = featureToggles.wishlist === false ? [] : products.filter((p) => wishlist.some((w) => String(w) === String(p.id)) && !inCart.has(String(p.id)));
 
   return (
     <>
@@ -35,28 +35,29 @@ export default function CartView() {
         <div className="grid items-start gap-5 lg:grid-cols-[1fr_22rem]">
           <div className="space-y-3">
             <div className="rounded-xl bg-white p-3">
-              <div className="h-2 overflow-hidden rounded-full bg-cream"><div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (totals.subtotal / cfg.freeDeliveryLimit) * 100)}%` }} /></div>
-              <p className="mt-1 text-xs">{totals.toFree > 0 ? `Add ${money(totals.toFree)} more for free delivery` : method === "express" ? "Free delivery applies to Standard delivery only. Express always has a fee." : "Free delivery unlocked"}</p>
+              <div className="h-2 overflow-hidden rounded-full bg-cream"><div className="h-full bg-primary transition-all" style={{ width: `${cfg.freeDeliveryLimit > 0 ? Math.min(100, (totals.subtotal / cfg.freeDeliveryLimit) * 100) : 0}%` }} /></div>
+              <p className="mt-1 text-xs">{totals.toFree > 0 ? `Add ${money(totals.toFree)} more for free delivery` : totals.free ? "Free delivery unlocked" : "Delivery fee applies"}</p>
             </div>
             {lines.map(({ product: p, qty, total: lt }) => (
               <div key={p.id} className="rounded-xl bg-white p-3 text-sm shadow-sm ring-1 ring-black/5">
                 <div className="flex items-center justify-between gap-3">
-                  <Link href={productHref(p)} className="flex min-w-0 items-center gap-3"><Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label="" className="h-14 w-14 shrink-0 rounded-lg" /><span className="min-w-0"><b className="block truncate">{p.name}</b><span className="text-xs text-ink/60">{p.brand} · {money(p.price)}{p.unit === "kg" ? "/kg" : ""}</span></span></Link>
+                  <Link href={productHref(p)} className="flex min-w-0 items-center gap-3"><Art src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-14 w-14 shrink-0 rounded-lg" /><span className="min-w-0"><b className="block truncate">{p.name}</b><span className="text-xs text-ink/60">{p.brand} · {money(p.price)}{p.unit === "kg" ? "/kg" : ""}</span></span></Link>
                   <b className="shrink-0">{money(lt)}</b>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <button onClick={() => setQty(p.id, qty - stepOf(p))} aria-label={`Decrease ${p.name}`} className="h-8 w-8 rounded bg-primary-light">−</button>
                     <span className="min-w-[3.2rem] text-center">{qtyLabel(p, qty)}</span>
-                    <button onClick={() => setQty(p.id, qty + stepOf(p))} disabled={qty >= maxQty(p)} aria-label={`Increase ${p.name}`} className="h-8 w-8 rounded bg-primary text-white disabled:opacity-40">+</button>
+                    <button onClick={() => setQty(p.id, qty + stepOf(p))} disabled={qty >= maxQty(p, cfg.maxQtyPerLine)} aria-label={`Increase ${p.name}`} className="h-8 w-8 rounded bg-primary text-white disabled:opacity-40">+</button>
                   </div>
                   <select value={subst[p.id] || "brand"} onChange={(e) => setSubst({ ...subst, [p.id]: e.target.value })} aria-label={`If ${p.name} is unavailable`} className="rounded border border-accent/40 px-1 py-1 text-xs">
                     <option value="brand">Replace with similar brand</option><option value="remove">Remove if unavailable</option><option value="call">Call me</option>
                   </select>
                 </div>
-                {p.subscribable && <label className="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" checked={subscribed.includes(p.id)} onChange={() => toggleSub(p.id)} /> Subscribe & save {cfg.subscribePct}%</label>}
+                {p.subscribable && featureToggles.subscribe_and_save !== false && <label className="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" checked={subscribed.includes(p.id)} onChange={() => toggleSub(p.id)} /> Subscribe & save {cfg.subscribePct}%</label>}
                 <div className="mt-2 flex gap-4 text-xs">
-                  <button onClick={() => saveForLater(p)} className="font-semibold text-primary underline">{t("save_later")}</button>
+                  {featureToggles.wishlist !== false && (                  <button onClick={() => saveForLater(p)} className="font-semibold text-primary underline">{t("save_later")}</button>)}
+
                   <button onClick={() => setQty(p.id, 0)} className="text-ink/60 underline">{t("remove")}</button>
                 </div>
               </div>

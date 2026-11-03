@@ -16,7 +16,7 @@ export default function DeliveryCheck() {
         {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
       </select>
       <p className="mt-1.5 text-ink/70">
-        {money(area.charge)} · {area.courier ? `Courier ${area.eta}` : area.express ? "Slots or Express (~90 min)" : "Choose a slot at checkout"} · {t("free_delivery")} {money(config.freeDeliveryLimit)}+
+        {money(area.charge)} · {area.courier ? `Courier ${area.eta}` : area.express ? "Slots or Express (~90 min)" : "Choose a slot at checkout"} · {config.freeDeliveryLimit > 0 && <>{t("free_delivery")} {money(config.freeDeliveryLimit)}+</>}
       </p>
     </div>
   );

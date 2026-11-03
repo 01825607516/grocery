@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import HeaderToggles from "./HeaderToggles";
+import AdminMenu from "./AdminMenu";
+import { useI18n } from "@/context/I18nContext";
 import HeaderSearch from "./HeaderSearch";
 import useView from "@/hooks/useView";
 import { useCart } from "@/context/CartContext";
@@ -93,12 +95,15 @@ export default function Header() {
   const active = useView();
   const pathname = usePathname();
   const { area, setArea, wishlist, isWished, count, setDrawerOpen } = useCart();
-  const { areas, products, offers, slots, config, siteContent, support } = useCatalog();
-  const brandName = siteContent?.brand_name || "Freshly";
+  const { areas, products, offers, slots, config, siteContent, support, featureToggles = {} } = useCatalog();
+  const { lang } = useI18n();
+  const brandName = (lang === "bn" ? siteContent?.brand_name_bn : siteContent?.brand_name_en) || siteContent?.brand_name || "Freshly";
   const phone = support?.phone || siteContent?.phone || "0949324782";
   const headerCopy = siteContent?.header || {};
-  const navItems = siteContent?.nav?.length ? siteContent.nav : NAV;
-  const { user, requireLogin, setAccountOpen } = useAuth();
+  const layout = siteContent?.layout || {};
+  const hiddenIds = new Set((layout.sections || []).filter((s) => s?.show === false).map((s) => s.id)); // a hidden home section loses its menu link
+  const navItems = (siteContent?.nav?.length ? siteContent.nav : NAV).filter((n) => !hiddenIds.has(n.id));
+  const { user, admin, requireLogin, setAccountOpen, setAdminMenuOpen } = useAuth();
   const [wishOpen, setWishOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
   const sale = offers.weekend[0];
@@ -115,7 +120,7 @@ export default function Header() {
   return (
     <header ref={headRef} className="sticky top-0 z-40 border-b border-accent/40 bg-cream">
       {/* line 1: delivery area (left) + live sale countdown (right) + phone (wide screens) */}
-      <div className="bg-primary-dark text-cream/90">
+      {layout.topbar !== false && <div className="bg-primary-dark text-cream/90">
         <div className="container-x flex items-center gap-x-3 py-1.5 text-xs md:text-[13px]">
           <div className="flex min-w-0 items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-accent" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
@@ -128,21 +133,22 @@ export default function Header() {
           {sale && <SaleTicker title={sale.title} endsAt={sale.endsAt} labels={headerCopy} onShop={() => setSaleOpen(true)} />}
           <a href={`tel:${String(phone).replace(/[^\d+]/g, "")}`} className={`hidden whitespace-nowrap font-medium tracking-wide text-accent xl:block ${sale ? "" : "ml-auto"}`}>{headerCopy.call_label || "Call"} {support?.phone_label || siteContent?.phone_label || phone}</a>
         </div>
-      </div>
+      </div>}
       <div className="container-x flex items-center gap-3 py-3.5 md:gap-5 lg:gap-4">
-        <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary">{siteContent?.logo_url ? <img src={siteContent.logo_url} alt={brandName} className="h-9 max-w-36 object-contain" /> : <>{brandName}<span className="text-accent">.</span></>}</a>
+        <a href={`${pathname === "/" ? "" : "/"}#home`} className="font-display text-[1.7rem] font-bold leading-none tracking-wide text-primary" data-no-translate>{siteContent?.logo_url ? <img src={siteContent.logo_url} alt={brandName} className="h-9 max-w-36 object-contain" /> : <>{brandName}<span className="text-accent">.</span></>}</a>
         <nav aria-label={headerCopy.nav_label || "Page sections"} className="mx-auto hidden lg:block"><NavLinks active={active} items={navItems} /></nav>
-        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><HeaderSearch label={headerCopy.search_label || "Search"} /><IconButton path={HEART} label={headerCopy.wishlist_label || "Wishlist"} count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />
-        <IconButton path={BAG} label={headerCopy.cart_label || "Cart"} count={count} onClick={() => setDrawerOpen(true)} />
+        <span className="ml-auto flex items-center gap-3 md:gap-5 lg:ml-0 lg:gap-4 xl:gap-5"><HeaderSearch label={headerCopy.search_label || "Search"} />{featureToggles.wishlist !== false && <IconButton path={HEART} label={headerCopy.wishlist_label || "Wishlist"} count={wishlist.length} onClick={() => (user ? setWishOpen(true) : requireLogin(() => setWishOpen(true), "Please log in to see your wishlist."))} />}
+        <IconButton path={BAG} label={headerCopy.cart_label || "Cart"} count={count} onClick={() => featureToggles.mini_cart === false ? window.location.assign("/cart") : setDrawerOpen(true)} />
         <HeaderToggles />
-        <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : (headerCopy.login_label || "Login")} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} /></span>
+        {/* ONE account entry: an administrator sees only the Admin menu (opens "Website management"); everyone else sees Login / their name */}
+        {admin && !user ? <AdminMenu label={String(admin.name || headerCopy.admin_label || "Admin").split(" ")[0].slice(0, 10)} /> : <IconButton path={USER} label={user ? user.name.split(" ")[0].slice(0, 10) : (headerCopy.login_label || "Login")} onClick={() => (user ? setAccountOpen(true) : requireLogin(null, ""))} />}</span>
       </div>
       {/* phones / small tablets: second row, swipeable */}
       <nav aria-label={headerCopy.nav_label || "Page sections"} className="border-t border-accent/20 lg:hidden">
         <NavLinks active={active} items={navItems} className="container-x justify-start overflow-x-auto py-1" />
       </nav>
       {saleOpen && sale && <CollectionModal open onClose={() => setSaleOpen(false)} title={sale.title} products={products.filter((p) => sale.cats.includes(p.category))} />}
-      {wishOpen && <CollectionModal key={wishlist.length} open onClose={() => setWishOpen(false)} title="Your wishlist" products={products.filter((p) => isWished(p.id))} />}
+      {featureToggles.wishlist !== false && wishOpen && <CollectionModal key={wishlist.length} open onClose={() => setWishOpen(false)} title="Your wishlist" products={products.filter((p) => isWished(p.id))} />}
     </header>
   );
 }

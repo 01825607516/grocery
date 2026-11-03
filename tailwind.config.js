@@ -5,15 +5,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: { DEFAULT: "#1f4d3a", dark: "#133427", light: "#e7efe9" }, // deep green
-        accent: { DEFAULT: "#b9a36b", dark: "#8f7a45" },                    // brass / antique gold (borders, rules, rings)
-        coffee: { DEFAULT: "#1f4d3a", dark: "#133427" },                    // heading pills, offer bars = deep green
-        cream: "#f8f6ef",                                                   // page background
-        sand: "#f1ecdc",                                                    // trust strip above the footer
-        ink: "#1f2a24",                                                     // text
-        sale: "#1f4d3a",                                                    // discount badge
+        // Colours come from CSS variables (defaults in globals.css, changed by Website Management > Look & feel).
+        primary: { DEFAULT: "rgb(var(--c-primary) / <alpha-value>)", dark: "rgb(var(--c-primary-dark) / <alpha-value>)", light: "rgb(var(--c-primary-light) / <alpha-value>)" },
+        accent: { DEFAULT: "rgb(var(--c-accent) / <alpha-value>)", dark: "rgb(var(--c-accent-dark) / <alpha-value>)" },
+        coffee: { DEFAULT: "rgb(var(--c-primary) / <alpha-value>)", dark: "rgb(var(--c-primary-dark) / <alpha-value>)" },
+        cream: "rgb(var(--c-cream) / <alpha-value>)",
+        sand: "rgb(var(--c-sand) / <alpha-value>)",
+        ink: "rgb(var(--c-ink) / <alpha-value>)",
+        sale: "rgb(var(--c-primary) / <alpha-value>)",
       },
-      fontFamily: { display: ["var(--font-display)", "serif"], hero: ["var(--font-hero)", "serif"], body: ["var(--font-body)", "sans-serif"] },
+      borderRadius: { md: "var(--r-md)", lg: "var(--r-lg)", xl: "var(--r-xl)", "2xl": "var(--r-2xl)" },
+      fontFamily: { display: ["var(--ff-display, var(--font-display))", "serif"], hero: ["var(--font-hero)", "serif"], body: ["var(--ff-body, var(--font-body))", "sans-serif"] },
       keyframes: {
         kenburns: { "0%": { transform: "scale(1)" }, "100%": { transform: "scale(1.07)" } },
         shine: { "0%": { transform: "translateX(-150%) skewX(-20deg)" }, "55%, 100%": { transform: "translateX(450%) skewX(-20deg)" } },

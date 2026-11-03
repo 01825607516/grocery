@@ -1,10 +1,8 @@
  # Freshly – API contract (frontend ⇄ backend)
 
-The frontend already works end-to-end against a **mock backend** (`src/services/mockApi.js`, data kept in the browser).
-Every screen talks to ONE object: `api` from `src/services/index.js`. The real backend is `src/services/httpApi.js`.
-
-**To connect:** set `NEXT_PUBLIC_API_URL=https://…/v1` in `.env.local` → the app switches to `httpApi.js` automatically.
-If the supervisor's paths / field names differ, change them **only** in `src/services/httpApi.js` (top: `toProduct`, `toCategory`, `toUser`).
+(Historic note: the browser-only mock backend `mockApi.js` has been removed; the website now reads everything from the Dokani database through `src/services/`.)
+Every screen talks to ONE object: `api` from `src/services/index.js` (shopper calls -> `/api/shop/*`, catalogue -> `/api/dokani/catalog`, both served by this Next.js app and forwarded to the Dokani backend).
+`src/services/httpApi.js` is an optional generic REST adapter kept for reference only; `NEXT_PUBLIC_API_URL` no longer switches the website to it.
 
 * JSON in / out. Authenticated calls send `Authorization: Bearer <token>`.
 * Errors: HTTP 4xx/5xx with `{ "message": "human readable text" }` – the UI shows `message` as-is. `401` on an authenticated call logs the user out and opens the login popup.

@@ -78,7 +78,7 @@ export default function SmartListModal() {
                     {r.pick ? (
                       <>
                         <input type="checkbox" checked={r.on} onChange={(e) => patch(r.key, () => ({ on: e.target.checked, dropped: false }))} aria-label={`Include ${r.pick.name}`} />
-                        <Art src={r.pick.image} fallback={r.pick.fallback} kind={r.pick.kind} color={r.pick.color} label="" className="h-10 w-10 shrink-0 rounded-lg" />
+                        <Art src={r.pick.image} color={r.pick.color} label={r.pick.name} initialWhenMissing className="h-10 w-10 shrink-0 rounded-lg" />
                         <div className="min-w-0 flex-1">
                           {r.cands.length > 1 ? (
                             <select value={r.pick.id} onChange={(e) => swap(r, e.target.value)} aria-label={`Choose product for ${r.raw}`} className="w-full truncate rounded bg-transparent text-sm font-semibold outline-none">
@@ -99,7 +99,7 @@ export default function SmartListModal() {
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-accent/25 pt-3">
                 <div className="text-sm">
                   <b>{chosen.length}</b> item{chosen.length === 1 ? "" : "s"} · <b className="text-primary">{money(total)}</b>
-                  <p className="text-[11px] text-ink/50">{total >= cfg.freeDeliveryLimit ? "Free delivery (Standard)" : `${money(cfg.freeDeliveryLimit - total)} more for free delivery`}</p>
+                  <p className="text-[11px] text-ink/50">{cfg.freeDeliveryLimit > 0 ? (total >= cfg.freeDeliveryLimit ? "Free delivery (Standard)" : `${money(cfg.freeDeliveryLimit - total)} more for free delivery`) : "Delivery fee applies"}</p>
                 </div>
                 <button onClick={addAll} disabled={!chosen.length} className="btn">Add all to cart</button>
               </div>

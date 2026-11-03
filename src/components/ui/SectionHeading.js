@@ -1,5 +1,10 @@
+"use client";
+import { useCatalog } from "@/context/CatalogContext";
+
 // Centered title inside a deep-green pill, with fading brass rules on both sides.
-export default function SectionHeading({ title, right }) {
+// Website Management can reword a heading (site_content.section_titles, key = the built-in English title).
+export default function SectionHeading({ title: builtIn, right }) {
+  const title = useCatalog()?.siteContent?.section_titles?.[builtIn] || builtIn;
   return (
     <div className="mb-4 flex flex-col items-center gap-3">
       <div className="flex w-full items-center gap-3 md:gap-5">

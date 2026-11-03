@@ -1,6 +1,6 @@
 // REAL shopper data (wishlist, addresses, reviews, coupons, orders, alerts) through our own Next.js server route /api/shop.
-// Same method names and return shapes as mockApi.js, so no screen needs to change.
-// The cart itself stays in the browser (mockApi): Dokani's cart only holds whole numbers (no 0.5 kg) and has no "subscribe / substitution" fields.
+// Every method below reads / writes the real database (there is no mock backend any more).
+// The cart is saved per shopper on the server (GET / PUT /cart): see getCart / saveCart.
 import { http } from "./http";
 import { AUTH_API_URL } from "./config";
 

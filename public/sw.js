@@ -1,6 +1,6 @@
 // Freshly service worker: app shell + offline page. Bump VERSION to force an update.
-const VERSION = "freshly-v1";
-const SHELL = ["/", "/offline.html", "/icons/icon-192.png"];
+const VERSION = "freshly-v2-gcs";
+const SHELL = ["/", "/offline.html"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

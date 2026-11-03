@@ -10,6 +10,7 @@ import { useI18n } from "@/context/I18nContext";
 import { money, qtyLabel } from "@/lib/format";
 import { etaText, isActive } from "@/lib/orders";
 import { Crumbs, Missing, Row, fmtDate, payStatus } from "./common";
+import { useCatalog } from "@/context/CatalogContext";
 
 export const itemQty = (i) => qtyLabel({ unit: i.unit }, i.qty);
 export const itemPrice = (i) => `${money(i.price)}${i.unit === "kg" ? "/kg" : ""}`;
@@ -18,6 +19,7 @@ const RETURN_DAYS = 3; // return window after delivery (shown in Return policy p
 
 export default function OrderDetail({ id }) {
   const { reorder } = useCart();
+  const { featureToggles = {} } = useCatalog();
   const { t } = useI18n();
   const [order, setOrder] = useState(null);
   const [missing, setMissing] = useState(false);
@@ -31,6 +33,7 @@ export default function OrderDetail({ id }) {
     return () => clearInterval(t);
   }, [order, load]);
 
+  if (featureToggles.order_details === false) return <Missing title="Order details are unavailable" text="Your order summary remains available in My orders." />;
   if (missing) return <Missing title="Order not found" text="Check the order ID or open it from My orders." />;
   if (!order) return <p className="py-16 text-center text-ink/60">Loading order…</p>;
   const tot = order.totals;
@@ -48,7 +51,7 @@ export default function OrderDetail({ id }) {
               <div><p className="font-display text-lg font-semibold">{order.id}</p><p className="text-xs text-ink/60">Placed {fmtDate(order.createdAt)}</p></div>
               {!cancelled && isActive(order) && <p className="rounded-full bg-primary-light px-3 py-1 text-xs font-semibold text-primary">Arriving {etaText(order)}</p>}
             </div>
-            {cancelled ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">This order was cancelled.</p> : <OrderTracker status={order.status} />}
+            {cancelled ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">This order was cancelled.</p> : featureToggles.track_order !== false && <OrderTracker status={order.status} />}
           </section>
 
           <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5">
@@ -82,7 +85,7 @@ export default function OrderDetail({ id }) {
           </section>
           <div className="flex flex-col gap-2">
             <InvoiceButton id={order.id} />
-            <button onClick={(e) => reorder(order, e.currentTarget)} className="rounded-lg border border-primary py-2.5 text-sm font-semibold text-primary hover:bg-primary-light">{t("buy_again")}</button>
+            {featureToggles.buy_again !== false && <button onClick={(e) => reorder(order, e.currentTarget)} className="rounded-lg border border-primary py-2.5 text-sm font-semibold text-primary hover:bg-primary-light">{t("buy_again")}</button>}
             {order.returnRequest && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">Return requested · {order.returnRequest.reason}</p>}
             {canReturn && <button onClick={() => setAction("return")} className="rounded-lg border border-accent/60 bg-white py-2.5 text-sm font-semibold hover:bg-primary-light">{t("return_order")}</button>}
             {CANCELLABLE.includes(order.status) && <button onClick={() => setAction("cancel")} className="text-sm text-red-600 underline">{t("cancel_order")}</button>}

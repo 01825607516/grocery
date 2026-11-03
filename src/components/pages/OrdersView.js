@@ -8,6 +8,7 @@ import { etaText, isActive } from "@/lib/orders";
 import { EmptyState, fmtDate } from "./common";
 import InvoiceButton from "./InvoiceButton";
 import { useI18n } from "@/context/I18nContext";
+import { useCatalog } from "@/context/CatalogContext";
 
 const TABS = [["all", "All"], ["active", "On the way"], ["delivered", "Delivered"], ["cancelled", "Cancelled"]];
 const match = (tab, o) => tab === "all" || (tab === "active" ? isActive(o) : o.status === tab);
@@ -15,6 +16,7 @@ const match = (tab, o) => tab === "all" || (tab === "active" ? isActive(o) : o.s
 export default function OrdersView() {
   const { orders, refreshOrders, reorder } = useCart();
   const { t } = useI18n();
+  const { featureToggles = {} } = useCatalog();
   const [tab, setTab] = useState("all");
   const active = orders.some(isActive);
 
@@ -41,12 +43,12 @@ export default function OrdersView() {
                 <p className="text-ink/60">{fmtDate(o.createdAt)}</p>
               </div>
               <p className="mt-1 text-ink/70">{o.items.map((i) => `${i.name} × ${i.qty}`).join(", ")}</p>
-              <div className="my-3">{o.status === "cancelled" ? <p className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">Cancelled</p> : <OrderTracker status={o.status} compact />}</div>
+              {featureToggles.track_order !== false && <div className="my-3">{o.status === "cancelled" ? <p className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">Cancelled</p> : <OrderTracker status={o.status} compact />}</div>}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span>{isActive(o) ? <>Arriving {etaText(o)} · </> : null}<b>{money(o.totals.total)}</b></span>
                 <span className="flex gap-2">
                   <Link href={`/account/orders/${o.id}`} className="rounded-lg border border-primary px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary-light">Details</Link>
-                  <button onClick={(e) => reorder(o, e.currentTarget)} className="btn !px-4 !py-1.5">⚡ {t("reorder")}</button>
+                  {featureToggles.buy_again !== false && <button onClick={(e) => reorder(o, e.currentTarget)} className="btn !px-4 !py-1.5">⚡ {t("reorder")}</button>}
                 </span>
               </div>
             </article>

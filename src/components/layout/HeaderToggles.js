@@ -1,19 +1,28 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useI18n } from "@/context/I18nContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useCatalog } from "@/context/CatalogContext";
 
-// Language switch (EN | বাংলা) + dark/light toggle, shown in the header.
 export default function HeaderToggles() {
   const { lang, setLang } = useI18n();
   const { theme, toggle } = useTheme();
+  const { language = "en", languageMode = "en" } = useCatalog() || {};
   const dark = theme === "dark";
+  useEffect(() => {
+    if (languageMode === "en" || languageMode === "bn") {
+      if (lang !== languageMode) setLang(languageMode);
+    } else if (languageMode === "both" && !localStorage.getItem("gs_lang")) {
+      setLang(language === "bn" ? "bn" : "en");
+    }
+  }, [lang, language, languageMode, setLang]);
   const seg = (code, label) => (
     <button type="button" onClick={() => setLang(code)} aria-pressed={lang === code} data-no-translate
       className={`px-2.5 py-1 text-xs font-bold transition ${lang === code ? "bg-primary text-white" : "text-primary hover:bg-primary-light"}`}>{label}</button>
   );
   return (
     <span className="flex items-center gap-2" data-no-translate>
-      <span role="group" aria-label="Language" className="flex overflow-hidden rounded-full border border-primary/50">{seg("en", "EN")}{seg("bn", "বাংলা")}</span>
+      {languageMode === "both" && <span role="group" aria-label="Language" className="flex overflow-hidden rounded-full border border-primary/50">{seg("en", "EN")}{seg("bn", "BN")}</span>}
       <button type="button" onClick={toggle} aria-label={dark ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={dark}
         className="grid h-8 w-8 place-items-center rounded-full border border-primary/50 text-primary transition hover:bg-primary-light">
         {dark

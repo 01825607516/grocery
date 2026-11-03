@@ -1,13 +1,13 @@
 // REAL shopper auth (Dokani backend: L2-01 .. L2-06) through OUR Next.js server (src/app/api/shop/[...path]/route.js).
 // The browser never sees the Dokani service-account login; it only holds the SHOPPER token.
-// Same method names / return shapes as mockApi.js, so the UI does not change.
+// (The old browser-only mock backend has been removed: every call below hits the real database.)
 import { http } from "./http";
 import { tokenStore } from "./tokenStore";
 import { AUTH_API_URL } from "./config";
 
 const base = AUTH_API_URL;
 const toUser = (u) => ({ id: u.id, name: u.name, email: u.email || "", phone: u.phone || "" });
-// the rest of the app (cart / wishlist / orders) is still the browser mock, it needs to know who is logged in
+// keeps the last verified profile so a temporary network error at start-up does not log the shopper out (see AuthContext)
 const remember = (u) => { try { localStorage.setItem("gs_real_user", JSON.stringify(toUser(u))); } catch {} };
 const forget = () => { try { localStorage.removeItem("gs_real_user"); } catch {} };
 

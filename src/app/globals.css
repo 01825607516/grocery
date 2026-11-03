@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h, 9rem) + 0.5rem); }
+  html { font-size: var(--fs-root, 100%); scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h, 9rem) + 0.5rem); }
   body { @apply bg-cream font-body text-ink antialiased; }
   button { @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary; }
 }
@@ -33,3 +33,15 @@
 .dark input, .dark select, .dark textarea { color: #e8efe9; }
 .dark input::placeholder, .dark textarea::placeholder { color: rgba(232,239,233,.45); }
 .dark img { filter: brightness(.92); }
+
+/* ---------- Theme defaults (Website Management > Look & feel overrides these on <html>) ---------- */
+:root {
+  --c-primary: 31 77 58; --c-primary-dark: 19 52 39; --c-primary-light: 231 239 233;
+  --c-accent: 185 163 107; --c-accent-dark: 143 122 69;
+  --c-cream: 248 246 239; --c-sand: 241 236 220; --c-ink: 31 42 36;
+  --c-card: 255 255 255; --fs-root: 100%;
+  --r-md: .375rem; --r-lg: .5rem; --r-xl: .75rem; --r-2xl: 1rem;
+}
+
+/* white cards / panels follow Look & feel > Card colour (translucent white such as bg-white/10 is not touched) */
+.bg-white { background-color: rgb(var(--c-card)); }

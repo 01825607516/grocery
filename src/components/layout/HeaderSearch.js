@@ -16,7 +16,7 @@ const TRY = ["Milk", "Egg", "Rice", "Biryani", "Chicken"];
 // Search icon in the header -> a search panel drops down from the top.
 // Live suggestions (categories, brands, dish ingredients, products with + / - buttons). Enter = full results popup.
 export default function HeaderSearch({ label = "Search" }) {
-  const { products: all, brands, categories, recipes, byName } = useCatalog();
+  const { products: all, brands, categories, recipes, byName, featureToggles = {} } = useCatalog();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -37,7 +37,7 @@ export default function HeaderSearch({ label = "Search" }) {
   const match = (p) => [p.name, p.brand, p.sub].some((s) => hay(s).includes(term));
   const products = term ? all.filter(match).slice(0, 6) : [];
   const others = term ? [...brands.filter((b) => hay(b).includes(term)).map((b) => ({ type: "brand", name: b })), ...categories.filter((c) => hay(c.name).includes(term)).map((c) => ({ type: "category", name: c.name, id: c.id }))].slice(0, 3) : [];
-  const dishes = term ? recipeHits(q, recipes, byName).slice(0, 1) : [];
+  const dishes = term && featureToggles.recipes !== false ? recipeHits(q, recipes, byName).slice(0, 1) : [];
   const showAll = () => { if (!term) return; setResults({ title: `Results for “${q.trim()}”`, list: all.filter(match) }); close(); };
   const openList = () => { close(); window.dispatchEvent(new CustomEvent("open-smart-list")); };
 
@@ -66,10 +66,10 @@ export default function HeaderSearch({ label = "Search" }) {
                   <div className="mt-2 flex flex-wrap gap-2">
                     {TRY.map((t) => <button key={t} onClick={() => { setQ(t); inputRef.current?.focus(); }} className="rounded-full bg-white px-3 py-1.5 text-sm font-medium text-primary ring-1 ring-accent/40 hover:bg-primary-light">{t}</button>)}
                   </div>
-                  <button onClick={openList} className="mt-4 flex w-full items-center gap-3 rounded-xl bg-primary-light/70 p-3 text-left ring-1 ring-accent/30 transition hover:bg-primary-light">
+{featureToggles.smart_grocery_list !== false && (                  <button onClick={openList} className="mt-4 flex w-full items-center gap-3 rounded-xl bg-primary-light/70 p-3 text-left ring-1 ring-accent/30 transition hover:bg-primary-light">
                     <span className="text-xl" aria-hidden="true">📝</span>
                     <span className="min-w-0"><b className="block text-sm text-primary-dark">Have a whole shopping list?</b><span className="text-xs text-ink/60">Type it once, we fill your cart →</span></span>
-                  </button>
+                  </button>) }
                 </div>
               ) : (
                 <div className="rounded-xl bg-white p-2 text-ink">
@@ -77,7 +77,7 @@ export default function HeaderSearch({ label = "Search" }) {
                   {dishes.map((r) => <RecipeHint key={r.name} recipe={r} compact />)}
                   {products.map((p) => (
                     <div key={p.id} className="flex items-center justify-between gap-2 px-2 py-1.5 text-sm">
-                      <span className="flex min-w-0 items-center gap-2"><Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label={p.name} className="h-10 w-10 shrink-0 rounded" /><span className="truncate">{p.name}</span> <b className="text-primary">{money(p.price)}</b></span>
+                      <span className="flex min-w-0 items-center gap-2"><Art src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-10 w-10 shrink-0 rounded" /><span className="truncate">{p.name}</span> <b className="text-primary">{money(p.price)}</b></span>
                       <QuantityControl product={p} />
                     </div>
                   ))}

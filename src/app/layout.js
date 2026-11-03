@@ -7,8 +7,10 @@ import AuthModal from "@/components/auth/AuthModal";
 import AccountModal from "@/components/auth/AccountModal";
 import ProductModal from "@/components/product/ProductModal";
 import Toast from "@/components/ui/Toast";
+import StoreTheme from "@/components/layout/StoreTheme";
 import { I18nProvider } from "@/context/I18nContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { getStoreSEO } from "@/services/dokani/storefront";
 import "./globals.css";
 
 // Runs before first paint so the saved / system theme is applied without a flash (same logic as ThemeContext).
@@ -18,7 +20,30 @@ const display = Playfair_Display({ subsets: ["latin"], variable: "--font-display
 const hero = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600", "700"], style: ["normal", "italic"], variable: "--font-hero", display: "swap" });
 const body = Source_Sans_3({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
-export const metadata = { title: "Fresh Organic Market", description: "Fresh groceries delivered to your door" };
+export async function generateMetadata() {
+  const fallback = { title: "Fresh Organic Market", description: "Fresh groceries delivered to your door" };
+  try {
+    const settings = await getStoreSEO();
+    const seo = settings?.seo || {};
+    const language = settings?.language === "bn" ? "bn" : "en";
+    const localized = seo[language] || {};
+    const title = String(localized.title || "").trim() || fallback.title;
+    const description = String(localized.description || "").trim() || fallback.description;
+    const keywords = String(localized.keywords || "").trim();
+    const image = String(seo.og_image || "").trim();
+    const favicon = String(settings?.faviconUrl || "").trim();
+    return {
+      title,
+      description,
+      ...(keywords ? { keywords } : {}),
+      ...(favicon ? { icons: { icon: favicon, shortcut: favicon } } : {}),
+      openGraph: { title, description, ...(image ? { images: [image] } : {}) },
+      twitter: { card: image ? "summary_large_image" : "summary", title, description, ...(image ? { images: [image] } : {}) },
+    };
+  } catch {
+    return fallback;
+  }
+}
 export const viewport = { themeColor: "#1f4d3a" };
 
 export default function RootLayout({ children }) {
@@ -30,6 +55,7 @@ export default function RootLayout({ children }) {
         <I18nProvider>
         <AuthProvider>
           <CatalogProvider>
+            <StoreTheme />
             <CartProvider>
              <ReviewProvider>
               {children}

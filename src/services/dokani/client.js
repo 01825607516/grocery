@@ -46,7 +46,7 @@ export async function dokaniGet(path, query = {}, { retried = false } = {}) {
   }
   if (res.status === 401 && !retried) { resetSession(); return dokaniGet(path, query, { retried: true }); }
   const json = await res.json().catch(() => null);
-  if (!res.ok || json?.success === false) throw new DokaniError(json?.message || `Dokani request failed (HTTP ${res.status}) for ${path}`, { status: res.status, data: json });
+  if (!res.ok || json?.success === false) throw new DokaniError(json?.message || `Dokani request failed (HTTP ${res.status}) for ${path}`, { status: res.status, data: json, retryAfterMs: Number(res.headers.get("Retry-After")) * 1000 || 0 });
   return json;
 }
 

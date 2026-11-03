@@ -92,7 +92,7 @@ export function DetailsReviews({ p, tab, setTab, rv, related }) {
     setVoteErr("");
     try { await vote(p, r); } catch (e) { setVoteErr(e?.message || "Could not save your vote."); }
   };
-  const { products, categories } = useCatalog();
+  const { products, categories, featureToggles = {} } = useCatalog();
   const { openProduct } = useCart();
   const category = categories?.find((c) => c.id === p.category)?.name;
   const sameBrand = useMemo(() => products.filter((x) => x.brand === p.brand && x.id !== p.id).slice(0, 4), [products, p]);
@@ -108,9 +108,9 @@ export function DetailsReviews({ p, tab, setTab, rv, related }) {
   const tabBtn = (id, label) => <button type="button" onClick={() => setTab(id)} className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${tab === id ? "border-primary text-primary" : "border-transparent text-ink/60 hover:text-ink"}`}>{label}</button>;
   return (
     <div className="mt-5">
-      <div className="flex border-b border-accent/30">{tabBtn("details", "Product details")}{tabBtn("reviews", `Reviews (${rv.count})`)}</div>
+      <div className="flex border-b border-accent/30">{tabBtn("details", "Product details")}{featureToggles.product_reviews !== false && tabBtn("reviews", `Reviews (${rv.count})`)}</div>
 
-      {tab === "details" ? (
+      {tab === "details" || featureToggles.product_reviews === false ? (
         <div className="pt-3 text-sm">
           {p.description && <p className="mb-3 text-ink/80">{p.description}</p>}
           <dl className="overflow-hidden rounded-xl bg-white">
@@ -123,7 +123,7 @@ export function DetailsReviews({ p, tab, setTab, rv, related }) {
                 {sameBrand.map((b) => (
                   <li key={b.id}>
                     <button type="button" onClick={() => openProduct(b)} className="block w-full rounded-xl bg-white p-2 text-left transition hover:shadow-md">
-                      <Art src={b.image} fallback={b.fallback} kind={b.kind} color={b.color} label={b.name} className="aspect-square w-full rounded-lg" />
+                      <Art src={b.image} color={b.color} label={b.name} initialWhenMissing className="aspect-square w-full rounded-lg" />
                       <span className="mt-1 block truncate text-xs font-semibold">{b.name}</span>
                       <span className="text-xs font-bold text-[#e11d2e]">{money(b.price)}</span>
                     </button>
@@ -138,7 +138,7 @@ export function DetailsReviews({ p, tab, setTab, rv, related }) {
               <ul className="grid gap-2">
                 {related.map((r) => (
                   <li key={r.id} className="flex items-center gap-3 rounded-xl bg-white p-2 text-sm">
-                    <button type="button" onClick={() => openProduct(r)} aria-label={`View ${r.name}`}><Art src={r.image} fallback={r.fallback} kind={r.kind} color={r.color} label={r.name} className="h-12 w-12 rounded-lg" /></button>
+                    <button type="button" onClick={() => openProduct(r)} aria-label={`View ${r.name}`}><Art src={r.image} color={r.color} label={r.name} initialWhenMissing className="h-12 w-12 rounded-lg" /></button>
                     <span className="min-w-0 flex-1"><span className="block truncate font-semibold">{r.name}</span><b className="text-primary">{money(r.price)}</b>{unitLabel(r)}</span>
                     <QuantityControl product={r} />
                   </li>
@@ -201,7 +201,7 @@ export function DetailsReviews({ p, tab, setTab, rv, related }) {
 // Quick view: opens when a product card is tapped (this is also what counts as "viewed" for Recommendations).
 export default function ProductModal() {
   const { quick: p, closeProduct, items, orders, isWished, toggleWish, openProduct, startBuyNow } = useCart();
-  const { products } = useCatalog();
+  const { products, featureToggles = {} } = useCatalog();
   const [tab, setTab] = useState("details");
   useEffect(() => { setTab("details"); }, [p?.id]);
   const related = useMemo(() => (p ? recommend({ products, cartIds: [], viewedIds: [p.id], orders, limit: 3 }).filter((x) => x.id !== p.id).slice(0, 3) : []), [p, products, orders]);
@@ -217,7 +217,9 @@ export default function ProductModal() {
         <ZoomImage product={p} className="mx-auto w-full max-w-[16rem] md:max-w-none" />
         <div className="flex flex-col gap-2 text-sm">
           <p className="text-ink/60">{p.brand} · {p.sub}</p>
-          <button type="button" onClick={() => setTab("reviews")} className="flex w-fit items-center gap-1.5 text-xs text-ink/60 hover:text-ink">{rv.count > 0 ? <><Stars value={rv.rating} /> <b className="text-ink">{rv.rating.toFixed(1)}</b> ({rv.count} {rv.count > 1 ? "reviews" : "review"})</> : <span className="underline">No reviews yet · Write the first</span>}</button>
+          {featureToggles.product_reviews !== false && (
+            <button type="button" onClick={() => setTab("reviews")} className="flex w-fit items-center gap-1.5 text-xs text-ink/60 hover:text-ink">{rv.count > 0 ? <><Stars value={rv.rating} /> <b className="text-ink">{rv.rating.toFixed(1)}</b> ({rv.count} {rv.count > 1 ? "reviews" : "review"})</> : <span className="underline">No reviews yet · Write the first</span>}</button>
+          )}
           <StatusBadge status={p.status} />
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {save > 0 && <s className="text-base text-ink/45">{money(p.mrp)}</s>}
@@ -231,7 +233,7 @@ export default function ProductModal() {
             <div><QuantityControl product={p} label="Add to cart" /></div>
             {p.status !== "out" ? <button onClick={() => startBuyNow(p)} className="rounded-lg bg-[#e11d2e] py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#c4121e]">Buy now</button> : <NotifyButton p={p} />}
           </div>
-          <button onClick={() => toggleWish(p.id)} className="w-fit rounded-lg border border-accent/50 bg-white px-3 py-1.5 text-sm">{isWished(p.id) ? "♥ Saved" : "♡ Wishlist"}</button>
+          {featureToggles.wishlist !== false && (          <button onClick={() => toggleWish(p.id)} className="w-fit rounded-lg border border-accent/50 bg-white px-3 py-1.5 text-sm">{isWished(p.id) ? "♥ Saved" : "♡ Wishlist"}</button>) }
           <Link href={productHref(p)} onClick={closeProduct} className="w-fit text-xs font-semibold text-primary underline">View full page →</Link>
         </div>
       </div>

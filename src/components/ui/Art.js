@@ -9,15 +9,23 @@ const tint = (hex, a) => {
   return `#${f(n >> 16)}${f((n >> 8) & 255)}${f(n & 255)}`;
 };
 
-export default function Art({ src = "", fallback = "", color = "#4fa86b", className = "", label: rawLabel = "", round = false }) {
+export default function Art({ src = "", fallback = "", color = "#4fa86b", className = "", label: rawLabel = "", round = false, initialWhenMissing = false }) {
   const label = String(rawLabel ?? ""); // Dokani can send a null name: never call .replace on null
   const [tries, setTries] = useState(0); // 0 = src, 1 = fallback, 2 = placeholder tile
-  const urls = [src, fallback].filter(Boolean);
+  const urls = (initialWhenMissing ? [src] : [src, fallback]).filter(Boolean);
   const bad = tries >= urls.length;
   const ref = useRef(null);
   // catches images that already failed before React hydrated
   useEffect(() => { const el = ref.current; if (el && el.complete && el.naturalWidth === 0) setTries((t) => t + 1); }, [tries]);
   const shape = round ? "rounded-full" : "";
+  if (initialWhenMissing && bad) {
+    const initial = label.trim().charAt(0).toUpperCase();
+    return (
+      <div role="img" aria-label={label} style={{ backgroundColor: tint(color, 0.88), color }} className={`grid place-items-center overflow-hidden ${shape} ${className}`}>
+        <span className="select-none text-2xl font-semibold uppercase">{initial}</span>
+      </div>
+    );
+  }
   if (!bad) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img key={urls[tries]} ref={ref} src={urls[tries]} alt={label} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setTries((t) => t + 1)} style={{ backgroundColor: tint(color, 0.88) }} className={`${shape} object-cover ${className}`} />;

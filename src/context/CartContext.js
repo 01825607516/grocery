@@ -42,6 +42,7 @@ export function CartProvider({ children }) {
 
   const notify = useCallback((msg) => { setToast({ id: Date.now(), msg }); }, []);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); }, [toast]);
+  useEffect(() => { const on = (e) => { if (e.detail) notify(String(e.detail)); }; window.addEventListener("gs:toast", on); return () => window.removeEventListener("gs:toast", on); }, [notify]); // other contexts (e.g. admin sign-in) can show a toast
 
   // browser-only preferences (after mount, so server and first client render match)
   useEffect(() => {
@@ -86,7 +87,7 @@ export function CartProvider({ children }) {
   // ---- cart actions ----
   const setQty = (id, qty) => {
     const p = cat.getProduct(id); if (!p) return;
-    const max = maxQty(p);
+    const max = maxQty(p, cat.config.maxQtyPerLine);
     if (qty > max) { notify(max ? `Only ${qtyLabel(p, max)} of ${p.name} available` : `${p.name} is out of stock`); qty = max; }
     setItems((prev) => { const next = { ...prev }; if (qty <= 0) delete next[id]; else next[id] = qty; return next; });
     if (qty <= 0) { setSubscribed((s) => s.filter((x) => x !== id)); }
@@ -96,7 +97,7 @@ export function CartProvider({ children }) {
   const addMany = (list, label = "items", el = null) => gate(() => {
     const ok = list.filter((p) => p.status !== "out");
     if (ok.length && el?.isConnected) burstFromElement(el, true);
-    ok.forEach((p) => setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + stepOf(p), maxQty(p))));
+    ok.forEach((p) => setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + stepOf(p), maxQty(p, cat.config.maxQtyPerLine))));
     if (ok.length < list.length) notify(`${list.length - ok.length} out-of-stock ${label} skipped`);
     setDrawerOpen(true);
   }, "Please log in to add these to your cart.");
@@ -104,7 +105,7 @@ export function CartProvider({ children }) {
   const addLines = (entries, el = null) => gate(() => {
     const ok = entries.filter((e) => e.p && e.p.status !== "out" && e.qty > 0);
     if (ok.length && el?.isConnected) burstFromElement(el, true);
-    ok.forEach(({ p, qty }) => setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + qty, maxQty(p))));
+    ok.forEach(({ p, qty }) => setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + qty, maxQty(p, cat.config.maxQtyPerLine))));
     if (ok.length < entries.length) notify(`${entries.length - ok.length} unavailable item${entries.length - ok.length > 1 ? "s" : ""} skipped`);
     setDrawerOpen(true);
   }, "Please log in to add these to your cart.");
@@ -113,7 +114,7 @@ export function CartProvider({ children }) {
     order.items.forEach((i) => {
       const p = cat.getProduct(i.productId);
       if (!p || p.status === "out") return void (skipped += 1);
-      setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + i.qty, maxQty(p)));
+      setQty(p.id, Math.min((itemsRef.current[p.id] || 0) + i.qty, maxQty(p, cat.config.maxQtyPerLine)));
     });
     if (el?.isConnected && skipped < order.items.length) burstFromElement(el, true);
     if (skipped) notify(`${skipped} unavailable item${skipped > 1 ? "s" : ""} skipped`);
@@ -136,7 +137,7 @@ export function CartProvider({ children }) {
     if (p.status === "out") return notify(`${p.name} is out of stock`);
     setQuick(null); setDrawerOpen(false); setBuyNow({ id: p.id, qty: stepOf(p) });
   }, "Please log in to buy this item.");
-  const setBuyNowQty = (qty) => setBuyNow((b) => { if (!b) return b; const p = cat.getProduct(b.id); const max = maxQty(p); if (qty > max) notify(`Only ${qtyLabel(p, max)} of ${p.name} available`); return { ...b, qty: Math.max(stepOf(p), Math.min(qty, max)) }; });
+  const setBuyNowQty = (qty) => setBuyNow((b) => { if (!b) return b; const p = cat.getProduct(b.id); const max = maxQty(p, cat.config.maxQtyPerLine); if (qty > max) notify(`Only ${qtyLabel(p, max)} of ${p.name} available`); return { ...b, qty: Math.max(stepOf(p), Math.min(qty, max)) }; });
   const setArea = (a) => { setAreaId(a.id); ls.set("gs_area", a.id); };
 
   // ---- derived data ----
@@ -151,7 +152,8 @@ export function CartProvider({ children }) {
   const effMethod = method === "express" && area.express ? "express" : "standard";
   const slotsInfo = useMemo(() => (checkoutLines.length && !area.courier ? buildSlots(cat.slots, new Date(), cat.config.leadHours) : null), [checkoutLines.length > 0, drawerOpen, area, cat.slots, cat.config.leadHours]); // eslint-disable-line react-hooks/exhaustive-deps
   const slot = slotsInfo ? slotsInfo.list.find((s) => s.id === slotId && !s.disabled) || slotsInfo.list.find((s) => !s.disabled) || null : null;
-  const totals = computeTotals({ lines, subscribed, coupon, area, method: effMethod, cfg: cat.config });
+  const activeSubscribed = cat.featureToggles?.subscribe_and_save === false ? [] : subscribed;
+  const totals = computeTotals({ lines, subscribed: activeSubscribed, coupon, area, method: effMethod, cfg: cat.config });
   const checkoutTotals = buyNow ? computeTotals({ lines: checkoutLines, subscribed: [], coupon: null, area, method: effMethod, cfg: cat.config }) : totals;
   const subtotalForCoupon = totals.subtotal - totals.subDiscount;
 
@@ -163,7 +165,7 @@ export function CartProvider({ children }) {
 
   const placeOrder = async ({ address, payment }) => {
     const order = await api.placeOrder({
-      items: checkoutLines.map((l) => ({ productId: l.product.id, qty: l.qty, subscribe: !buyNow && subscribed.includes(l.product.id), substitution: (!buyNow && subst[l.product.id]) || "brand" })),
+      items: checkoutLines.map((l) => ({ productId: l.product.id, qty: l.qty, subscribe: !buyNow && activeSubscribed.includes(l.product.id), substitution: (!buyNow && subst[l.product.id]) || "brand" })),
       address, areaId: area.id, method: effMethod,
       slot: slot ? { id: slot.id, day: slot.day } : null,
       payment, couponCode: buyNow ? null : coupon?.code || null,

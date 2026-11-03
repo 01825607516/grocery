@@ -12,7 +12,7 @@ export default function ZoomImage({ product: p, scale = 2.3, className = "" }) {
   return (
     <div onMouseMove={move} onMouseLeave={() => setPos(null)} className={`relative overflow-hidden rounded-2xl bg-white ring-1 ring-black/5 md:cursor-zoom-in ${className}`}>
       <div className="transition-transform duration-150 ease-out will-change-transform" style={{ transform: pos ? `scale(${scale})` : "none", transformOrigin: pos ? `${pos.x}% ${pos.y}%` : "50% 50%" }}>
-        <Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label={p.name} className="aspect-square w-full" />
+        <Art src={p.image} color={p.color} label={p.name} initialWhenMissing className="aspect-square w-full" />
       </div>
       {!pos && <span aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 hidden items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[10px] font-medium text-white md:flex"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5M11 8v6M8 11h6" /></svg>Hover to zoom</span>}
     </div>

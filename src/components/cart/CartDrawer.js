@@ -10,11 +10,13 @@ import SoundToggle from "@/components/ui/SoundToggle";
 import DeliveryPicker from "./DeliveryPicker";
 import CompleteBasket from "./CompleteBasket";
 import CheckoutModal from "./CheckoutModal";
+import { useCatalog } from "@/context/CatalogContext";
 
 const Row = ({ k, v, neg, free }) => <div className="flex justify-between text-sm"><span>{k}</span><span className={neg || free ? "text-primary" : ""}>{free ? "Free" : <>{neg ? "−" : ""}{money(v)}</>}</span></div>;
 
 export default function CartDrawer() {
   const { user, requireLogin } = useAuth();
+  const { featureToggles = {} } = useCatalog();
   const { lines, totals, method, drawerOpen, setDrawerOpen, setQty, subscribed, toggleSub, subst, setSubst, coupon, setCoupon, applyCoupon, cfg, buyNow, closeBuyNow } = useCart();
   const [code, setCode] = useState("");
   const [couponMsg, setCouponMsg] = useState("");
@@ -40,25 +42,25 @@ export default function CartDrawer() {
         {!lines.length ? <p className="p-10 text-center text-ink/60">Your cart is empty. Add something fresh.</p> : (
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
             <div>
-              <div className="h-2 overflow-hidden rounded-full bg-white"><div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (totals.subtotal / cfg.freeDeliveryLimit) * 100)}%` }} /></div>
-              <p className="mt-1 text-xs">{totals.toFree > 0 ? `Add ${money(totals.toFree)} more for free delivery` : method === "express" ? "Free delivery applies to Standard delivery only. Express always has a fee." : "Free delivery unlocked"}</p>
+              <div className="h-2 overflow-hidden rounded-full bg-white"><div className="h-full bg-primary transition-all" style={{ width: `${cfg.freeDeliveryLimit > 0 ? Math.min(100, (totals.subtotal / cfg.freeDeliveryLimit) * 100) : 0}%` }} /></div>
+              <p className="mt-1 text-xs">{totals.toFree > 0 ? `Add ${money(totals.toFree)} more for free delivery` : totals.free ? "Free delivery unlocked" : "Delivery fee applies"}</p>
             </div>
             {lines.map(({ product: p, qty, total: t }) => (
               <div key={p.id} className="rounded-xl bg-white p-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label="" className="h-9 w-9 rounded" /><b>{p.name}</b></span><b>{money(t)}</b>
+                  <span className="flex items-center gap-2"><Art src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-9 w-9 rounded" /><b>{p.name}</b></span><b>{money(t)}</b>
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <button onClick={() => setQty(p.id, qty - stepOf(p))} aria-label={`Decrease ${p.name}`} className="h-7 w-7 rounded bg-primary-light">−</button>
                     <span>{qtyLabel(p, qty)}</span>
-                    <button onClick={() => setQty(p.id, qty + stepOf(p))} disabled={qty >= maxQty(p)} aria-label={`Increase ${p.name}`} className="h-7 w-7 rounded bg-primary text-white disabled:opacity-40">+</button>
+                    <button onClick={() => setQty(p.id, qty + stepOf(p))} disabled={qty >= maxQty(p, cfg.maxQtyPerLine)} aria-label={`Increase ${p.name}`} className="h-7 w-7 rounded bg-primary text-white disabled:opacity-40">+</button>
                   </div>
                   <select value={subst[p.id] || "brand"} onChange={(e) => setSubst({ ...subst, [p.id]: e.target.value })} aria-label={`If ${p.name} is unavailable`} className="rounded border border-accent/40 px-1 py-1 text-xs">
                     <option value="brand">Replace with similar brand</option><option value="remove">Remove if unavailable</option><option value="call">Call me</option>
                   </select>
                 </div>
-                {p.subscribable && <label className="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" checked={subscribed.includes(p.id)} onChange={() => toggleSub(p.id)} /> Subscribe & save {cfg.subscribePct}%</label>}
+                {p.subscribable && featureToggles.subscribe_and_save !== false && <label className="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" checked={subscribed.includes(p.id)} onChange={() => toggleSub(p.id)} /> Subscribe & save {cfg.subscribePct}%</label>}
               </div>
             ))}
             <CompleteBasket compact />

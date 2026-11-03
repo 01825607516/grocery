@@ -1,3 +1,5 @@
+import { localImageUrl } from "@/lib/images";
+
 // PWA manifest (Next serves it at /manifest.webmanifest and links it automatically).
 export default function manifest() {
   return {
@@ -11,9 +13,9 @@ export default function manifest() {
     background_color: "#fdf8ee",
     theme_color: "#1f6b3a",
     icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-      { src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: localImageUrl("/icons/icon-192.png"), sizes: "192x192", type: "image/png" },
+      { src: localImageUrl("/icons/icon-512.png"), sizes: "512x512", type: "image/png" },
+      { src: localImageUrl("/icons/maskable-512.png"), sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

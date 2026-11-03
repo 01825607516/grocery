@@ -5,11 +5,13 @@ import { money } from "@/lib/format";
 import { getWishPrice, isPriceWatching, setPriceWatching } from "@/lib/notify";
 import { api } from "@/services";
 import NotifyButton from "./NotifyButton";
+import { useCatalog } from "@/context/CatalogContext";
 
 // Under each wishlist card: "cheaper than when you saved it", a price-drop alert and (for out-of-stock items) a back-in-stock alert.
 // Saved price + alerts are kept per browser for now; with a real backend: POST /products/:id/price-alert.
 export default function WishExtras({ p }) {
   const { notify } = useCart();
+  const alertsEnabled = useCatalog()?.featureToggles?.price_drop_alerts !== false;
   const [saved, setSaved] = useState(null);
   const [watch, setWatch] = useState(false);
   useEffect(() => { setSaved(getWishPrice(p.id)); setWatch(isPriceWatching(p.id)); }, [p.id]);
@@ -20,7 +22,7 @@ export default function WishExtras({ p }) {
       {saved != null && (diff === 0
         ? <p className="text-ink/55">Saved at {money(saved)}</p>
         : <p className={`font-semibold ${diff < 0 ? "text-primary" : "text-[#e11d2e]"}`}>{diff < 0 ? "↓" : "↑"} {money(Math.abs(diff))} {diff < 0 ? "cheaper" : "higher"} than when you saved it ({money(saved)})</p>)}
-      {p.status !== "out" && (
+      {alertsEnabled && p.status !== "out" && (
         <button type="button" onClick={toggle} aria-pressed={watch} className={`rounded-lg border px-2.5 py-1.5 font-semibold transition ${watch ? "border-primary bg-primary-light text-primary" : "border-accent/60 text-ink/70 hover:bg-white"}`}>🔔 {watch ? "We will tell you if the price drops" : "Alert me if price drops"}</button>
       )}
       <NotifyButton p={p} />

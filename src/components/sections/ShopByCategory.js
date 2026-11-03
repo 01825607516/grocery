@@ -14,7 +14,7 @@ export default function ShopByCategory() {
   const COUNTS = useMemo(() => Object.fromEntries(CATEGORIES.map((c) => [c.id, PRODUCTS.filter((p) => p.category === c.id).length])), [CATEGORIES, PRODUCTS]);
   const [page, setPage] = useState(1);
   const orderedCategories = useMemo(() => [...CATEGORIES].sort((a, b) =>
-    Number(!a.image?.startsWith("/categories/")) - Number(!b.image?.startsWith("/categories/"))
+    Number(!(a.custom || a.image?.includes("/categories/"))) - Number(!(b.custom || b.image?.includes("/categories/")))
   ), [CATEGORIES]);
   const pages = Math.ceil(orderedCategories.length / PER_PAGE);
   const list = orderedCategories.slice((page - 1) * PER_PAGE, page * PER_PAGE);

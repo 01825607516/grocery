@@ -25,7 +25,7 @@ const chip = (on) => `rounded-full px-4 py-1.5 text-sm transition ${on ? "bg-pri
 // so a filtered list can be shared / bookmarked and the back button works.
 // `category` is set on /category/[id]; on /shop the category is a filter (?cat=).
 export default function ShopView({ category = null }) {
-  const { products, categories, recipes, byName } = useCatalog();
+  const { products, categories, recipes, byName, featureToggles = {} } = useCatalog();
   const router = useRouter();
   const path = usePathname();
   const sp = useSearchParams();
@@ -67,7 +67,7 @@ export default function ShopView({ category = null }) {
       : out;
   }, [scope, categories, q, sub, brands.join(","), min, max, sort, inStock, offersOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const dishes = useMemo(() => (q ? recipeHits(q, recipes, byName).slice(0, 2) : []), [q, recipes, byName]);
+  const dishes = useMemo(() => (q && featureToggles.recipes !== false ? recipeHits(q, recipes, byName).slice(0, 2) : []), [q, recipes, byName, featureToggles.recipes]);
   const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const visible = list.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);

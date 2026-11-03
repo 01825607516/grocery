@@ -1,26 +1,12 @@
 // Dokani product -> the shape Freshly's screens use (see PRODUCTS in src/lib/data.js). Pure functions, no network.
-// The Dokani backend is NOT changed. Every field it may send is used when present and has a safe fallback when it is missing/null.
+// Product photos come only from the product's own Dokani image fields; missing photos stay blank.
 import { CATEGORIES } from "@/lib/data";
-import { categoryFallback, categoryImage, productFallback } from "@/lib/images";
+import { categoryFallback, categoryImage } from "@/lib/images";
 import { CATEGORY_RULES, KG_UNITS, NEAR_EXPIRY_DAYS } from "./config";
 
 const num = (v, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
 const slug = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "other";
 const BY_ID = new Map(CATEGORIES.map((c) => [c.id, c]));
-const LOCAL_PRODUCT_PHOTOS = {
-  "tomato": "/products/tomato.png",
-  "red onion": "/products/red-onion.png",
-  "carrot": "/products/carrot.png",
-  "jute leaves (pat shak)": "/products/jute-leaves-pat-shak.png",
-  "farm eggs (brown)": "/products/eggs-brown.png",
-  "fresh instant milk powder": "/products/fresh-milk-powder.png",
-  "alin muffin cake chocolate": "/products/alin-muffin-cake.png",
-  "dan cake chocolate layer cake (12 pack)": "/products/dan-cake-chocolate-layer.png",
-  "pokka sencha green tea": "/products/pokka-sencha-green-tea.png",
-  "plum bodylovin vanilla vibes body lotion 400ml": "/products/plum-bodylovin-vanilla-vibes-lotion.png",
-  "sunsilk smooth & manageable shampoo": "/products/sunsilk-smooth-manageable-shampoo.png",
-};
-
 // Dokani category name -> Freshly category id
 export function categoryKey(name) {
   const n = String(name ?? "").trim();
@@ -29,10 +15,12 @@ export function categoryKey(name) {
 }
 
 // Freshly category object for an id. Known ids reuse the built-in look; a new id gets a generic one.
-export function toCategory(id, dokaniName) {
+// `row` = the category's Dokani row (optional): the picture saved in the database (image_url) always wins over the built-in one.
+export function toCategory(id, dokaniName, row) {
   const known = BY_ID.get(id);
-  if (known) return { ...known, dokaniName };
-  return { id, name: dokaniName || id, subs: [], kind: "box", color: "#4fa86b", image: categoryImage(id), fallback: categoryFallback(id), dokaniName };
+  const dbImage = typeof row?.image_url === "string" ? row.image_url.trim() : "";
+  if (known) return { ...known, ...(dbImage ? { image: dbImage } : {}), dokaniName };
+  return { id, name: dokaniName || id, subs: [], kind: "box", color: row?.tint_colour || "#4fa86b", image: dbImage || categoryImage(id), fallback: categoryFallback(id), dokaniName };
 }
 
 // "2026-10-14" / "14-10-2026" -> Date | null
@@ -86,15 +74,16 @@ export function mapProduct(p, now = Date.now()) {
     else if (left < NEAR_EXPIRY_DAYS * 86_400_000) status = "near";
   }
 
-  const photos = [p.cover_image_url, ...(Array.isArray(p.feature_image_urls) ? p.feature_image_urls : [])].filter(Boolean);
-  const localPhoto = LOCAL_PRODUCT_PHOTOS[String(p.name ?? p.display_name ?? "").trim().toLowerCase()] || "";
+  const photos = [p.cover_image_url, ...(Array.isArray(p.feature_image_urls) ? p.feature_image_urls : [])]
+    .filter((url) => typeof url === "string" && url.trim())
+    .map((url) => url.trim());
   const reviewCount = num(p.review_count);
   const name = String(p.name ?? p.display_name ?? "").trim() || `Product ${p.id}`; // a product with no name in Dokani still shows up (and never crashes the page)
   return {
     id: p.id, name, brand: p.company?.name || "", category, sub: p.model || "",
     price, mrp, unit, status, stock,
     kind: meta?.kind || "box", color: meta?.color || "#4fa86b",
-    image: photos[0] || localPhoto, images: photos.length ? photos : localPhoto ? [localPhoto] : [], fallback: localPhoto || productFallback(category, p.id),
+    image: photos[0] || "", images: photos, fallback: "",
     discount: mrp > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0,
     subscribable: Boolean(p.subscribable), description: p.description ?? "", barcode: p.barcode || "",
     // optional fields: only sent when Dokani has real data, so the UI never shows fake numbers

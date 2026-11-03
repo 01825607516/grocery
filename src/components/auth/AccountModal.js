@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Modal from "@/components/ui/Modal";
 import OrderTracker from "@/components/ui/OrderTracker";
+import { useCatalog } from "@/context/CatalogContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { money } from "@/lib/format";
@@ -12,6 +13,7 @@ import { etaText, isActive } from "@/lib/orders";
 export default function AccountModal() {
   const { user, accountOpen, setAccountOpen, logout } = useAuth();
   const { orders, refreshOrders, reorder } = useCart();
+  const { featureToggles = {} } = useCatalog();
   const active = orders.some(isActive);
 
   useEffect(() => {
@@ -43,10 +45,10 @@ export default function AccountModal() {
                 <p className="text-ink/60">{new Date(o.createdAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
               <p className="mt-1 text-ink/70">{o.items.map((i) => `${i.name} × ${i.qty}`).join(", ")}</p>
-              <div className="my-3"><OrderTracker status={o.status} compact /></div>
+              {featureToggles.track_order !== false && <div className="my-3"><OrderTracker status={o.status} compact /></div>}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span>{isActive(o) ? <>Arriving {etaText(o)} · </> : null}<b>{money(o.totals.total)}</b></span>
-                <button onClick={(e) => { reorder(o, e.currentTarget); setAccountOpen(false); }} className="btn !px-4 !py-1.5">Reorder</button>
+                {featureToggles.buy_again !== false && <button onClick={(e) => { reorder(o, e.currentTarget); setAccountOpen(false); }} className="btn !px-4 !py-1.5">Reorder</button>}
               </div>
             </article>
           ))}

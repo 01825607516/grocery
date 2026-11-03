@@ -18,9 +18,9 @@ const Row = ({ k, v, neg, free }) => <div className="flex justify-between"><span
 
 // Delivery address -> delivery (shared picker) -> payment -> order review -> place order -> success + live tracking.
 export default function CheckoutModal({ open, onClose, page = false }) {
-  const { payments } = useCatalog();
+  const { payments, featureToggles = {} } = useCatalog();
   const { setAccountOpen } = useAuth();
-  const { checkoutLines: lines, checkoutTotals: totals, buyNow, setBuyNowQty, area, method, slot, slotsInfo, placeOrder, setDrawerOpen, notify } = useCart();
+  const { checkoutLines: lines, checkoutTotals: totals, buyNow, setBuyNowQty, area, method, slot, slotsInfo, placeOrder, setDrawerOpen, notify, cfg } = useCart();
   const [addresses, setAddresses] = useState([]);
   const [addrId, setAddrId] = useState("new");       // saved address id or "new"
   const [type, setType] = useState("Home");
@@ -84,7 +84,7 @@ export default function CheckoutModal({ open, onClose, page = false }) {
         <p className="text-sm">Thank you! Order ID <b>{order.id}</b></p>
         <p className="text-sm">Estimated delivery: <b>{etaText(order)}</b> · Total <b>{money(order.totals.total)}</b></p>
         <p className="mt-0.5 text-xs text-ink/60">{order.payment.method === "Cash on Delivery" ? "Pay cash when your order arrives." : `${order.payment.method} payment is ${order.payment.status === "paid" ? "received" : "pending confirmation"}.`}</p>
-        <div className="mt-5"><OrderTracker status={order.status} /></div>
+        {featureToggles.track_order !== false && <div className="mt-5"><OrderTracker status={order.status} /></div>}
         <div className="mt-6 flex flex-wrap gap-2">
           <InvoiceButton id={order.id} className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary" />
           <button onClick={() => { close(); setAccountOpen(true); }} className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary">My orders</button>
@@ -135,7 +135,7 @@ export default function CheckoutModal({ open, onClose, page = false }) {
                   <span className="flex items-center overflow-hidden rounded-lg border border-primary text-xs font-semibold">
                     <button type="button" aria-label="Decrease" disabled={qty <= stepOf(p)} onClick={() => setBuyNowQty(qty - stepOf(p))} className="h-7 w-7 bg-primary-light disabled:opacity-40">−</button>
                     <span className="min-w-[2.8rem] text-center">{qtyLabel(p, qty)}</span>
-                    <button type="button" aria-label="Increase" disabled={qty >= maxQty(p)} onClick={() => setBuyNowQty(qty + stepOf(p))} className="h-7 w-7 bg-primary text-white disabled:opacity-40">+</button>
+                    <button type="button" aria-label="Increase" disabled={qty >= maxQty(p, cfg.maxQtyPerLine)} onClick={() => setBuyNowQty(qty + stepOf(p))} className="h-7 w-7 bg-primary text-white disabled:opacity-40">+</button>
                   </span>
                 )}
                 {money(t)}

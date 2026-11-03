@@ -1,7 +1,7 @@
  // Freshly catalogue read straight from Dokani Cloud (server only). Cached in memory for CATALOG_TTL_MS.
 import { assertShop, dokaniGet } from "./client";
 import { CATALOG_TTL_MS, cfg } from "./config";
-import { isSellable, mapProduct, toCategory } from "./mapper";
+import { categoryKey, isSellable, mapProduct, toCategory } from "./mapper";
 
 const PER_PAGE = 100;
 let cache = { at: 0, rows: null, pending: null };
@@ -13,6 +13,17 @@ async function categoryRows() {
   const rows = Array.isArray(j.category) ? j.category : j.category?.data ?? [];
   assertShop(rows); // every row carries shop_id: proves which shop this login belongs to
   return rows;
+}
+// The shop's own category rows (name + the picture saved in category_meta). Cached like the products; a failure just means "no DB pictures", never a broken store.
+let catCache = { at: 0, rows: [], pending: null };
+async function cachedCategoryRows() {
+  if (Date.now() - catCache.at < CATALOG_TTL_MS) return catCache.rows;
+  if (!catCache.pending) {
+    catCache.pending = categoryRows()
+      .then((rows) => { catCache = { at: Date.now(), rows, pending: null }; return rows; })
+      .catch(() => { catCache = { at: Date.now(), rows: [], pending: null }; return []; });
+  }
+  return catCache.pending;
 }
 async function verifyShopOnce() {
   const c = cfg();
@@ -43,12 +54,21 @@ async function fetchAllRows() {
 }
 
 async function rawRows() {
-  if (cache.rows && Date.now() - cache.at < CATALOG_TTL_MS) return cache.rows;
+  const now = Date.now();
+  if (cache.error && now < cache.errorUntil) throw cache.error;
+  if (cache.error) cache = { at: 0, rows: null, pending: null };
+  if (cache.rows && now - cache.at < CATALOG_TTL_MS) return cache.rows;
   if (!cache.pending) {
     cache.pending = verifyShopOnce()
       .then(fetchAllRows)
       .then((rows) => { assertShop(rows); cache = { at: Date.now(), rows, pending: null }; return rows; })
-      .catch((e) => { cache.pending = null; throw e; });
+      .catch((e) => {
+        if (Number(e?.status) === 429) {
+          const retryMs = Math.max(60 * 1000, Number(e?.retryAfterMs) || 0);
+          cache = { at: Date.now(), rows: null, pending: null, error: e, errorUntil: Date.now() + retryMs };
+        } else cache.pending = null;
+        throw e;
+      });
   }
   return cache.pending;
 }
@@ -71,7 +91,14 @@ export async function getCatalog() {
   // "Most bought today" only makes sense if something was really sold today: otherwise drop the field and the home row stays on its normal ranking.
   if (!products.some((p) => p.soldToday > 0)) products.forEach((p) => { delete p.soldToday; });
   const names = new Map(rows.map((p) => [mapProduct(p, now).category, p.category?.name]));
-  const categories = [...new Set(products.map((p) => p.category))].map((id) => toCategory(id, names.get(id)));
+  // picture (and name) saved for the category in the database: Dokani category rows are matched to Freshly's ids the same way products are
+  const dbRow = new Map();
+  for (const r of await cachedCategoryRows()) {
+    if (!r || Number(r.status) === 0) continue;
+    const id = categoryKey(r.name), have = dbRow.get(id);
+    if (!have || (!have.image_url && r.image_url)) dbRow.set(id, r);
+  }
+  const categories = [...new Set(products.map((p) => p.category))].map((id) => toCategory(id, names.get(id), dbRow.get(id)));
   const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))];
   const brandLogos = {}; // { "Brand name": logo url } only for brands whose Dokani company has a logo
   for (const p of rows) { const n = p.company?.name, u = logoUrl(p.company?.logo); if (n && u && !brandLogos[n]) brandLogos[n] = u; }
@@ -80,3 +107,6 @@ export async function getCatalog() {
 
 // Raw Dokani product rows (cached, same cache as the catalogue). Used by the order flow to read buy price / MRP on the server.
 export async function getRawProducts() { return rawRows(); }
+
+// Forget the cached product rows (used by /api/store/refresh after the admin saves something).
+export const clearCatalogCache = () => { cache = { at: 0, rows: null, pending: null }; catCache = { at: 0, rows: [], pending: null }; };

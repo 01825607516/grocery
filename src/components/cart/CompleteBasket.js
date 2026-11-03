@@ -10,9 +10,9 @@ import { completeRecipes, deliveryFillers } from "@/lib/shopping";
 // (2) "৳120 more for free delivery - these get you there". Hidden when there is nothing useful to say.
 export default function CompleteBasket({ compact = false }) {
   const { lines, totals, method, addLines } = useCart();
-  const { products, recipes, byName } = useCatalog();
+  const { products, recipes, byName, featureToggles = {} } = useCatalog();
   const ids = useMemo(() => lines.map((l) => l.product.id), [lines]);
-  const dishes = useMemo(() => completeRecipes(ids, recipes, byName, 2), [ids, recipes, byName]);
+  const dishes = useMemo(() => featureToggles.recipes === false ? [] : completeRecipes(ids, recipes, byName, 2), [ids, recipes, byName, featureToggles.recipes]);
   const gap = method === "express" ? 0 : totals.toFree; // free delivery only counts for Standard delivery
   const fill = useMemo(() => deliveryFillers(products, ids, gap, 3), [products, ids, gap]);
   if (!lines.length || (!dishes.length && !fill.length)) return null;
@@ -34,7 +34,7 @@ export default function CompleteBasket({ compact = false }) {
           <ul className="mt-1.5 space-y-1.5">
             {fill.map(({ p, cost }) => (
               <li key={p.id} className="flex items-center gap-2">
-                <Art src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label="" className="h-9 w-9 shrink-0 rounded-lg" />
+                <Art src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-9 w-9 shrink-0 rounded-lg" />
                 <span className="min-w-0 flex-1 truncate text-xs font-semibold">{p.name}<span className="ml-1 font-normal text-ink/50">{cost >= gap ? "gets you there" : `${p.discount}% off`}</span></span>
                 <b className="whitespace-nowrap text-xs text-primary">{money(cost)}{unitLabel(p) ? <span className="font-normal text-ink/50"> / 500 g</span> : ""}</b>
                 <button onClick={(e) => addLines([{ p, qty: stepOf(p) }], e.currentTarget)} aria-label={`Add ${p.name}`} className="h-7 w-7 rounded bg-primary text-white">+</button>

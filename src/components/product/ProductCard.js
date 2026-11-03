@@ -4,6 +4,7 @@ import { money, unitLabel } from "@/lib/format";
 import Art from "@/components/ui/Art";
 import { useReviews } from "@/context/ReviewContext";
 import StatusBadge from "./StatusBadge";
+import { useCatalog } from "@/context/CatalogContext";
 
 const RED = "#e11d2e"; // offer / price colour
 
@@ -11,6 +12,8 @@ const RED = "#e11d2e"; // offer / price colour
 // There are no buttons on the card: tapping it opens the product popup, where "Add to cart" and "Buy now" are.
 export default function ProductCard({ product: p, classic = false, rank, compact = false }) {
   const { isWished, toggleWish, openProduct } = useCart();
+  const featureToggles = useCatalog()?.featureToggles || {};
+  const wishlistEnabled = featureToggles.wishlist !== false;
   const rv = useReviews().summary(p);
   const save = Math.round(p.mrp - p.price); // taka saved (per kg for weight items)
   const offer = save > 0;
@@ -23,16 +26,21 @@ export default function ProductCard({ product: p, classic = false, rank, compact
         </span>
       )}
 
-      <button type="button" aria-label={`${isWished(p.id) ? "Remove from" : "Add to"} wishlist`} onClick={(e) => { e.stopPropagation(); toggleWish(p.id); }} className="absolute right-3 top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-white shadow ring-1 ring-black/5"><svg width="17" height="17" viewBox="0 0 24 24" strokeWidth="2" strokeLinejoin="round" className={isWished(p.id) ? "fill-red-500 stroke-red-500" : "fill-none stroke-ink/60"} aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0112 6a5.5 5.5 0 019.5 6c-2.5 4.4-9.5 9-9.5 9z" /></svg></button>
+      {wishlistEnabled && (
+        <button type="button" aria-label={`${isWished(p.id) ? "Remove from" : "Add to"} wishlist`} onClick={(e) => { e.stopPropagation(); toggleWish(p.id); }} className="absolute right-3 top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-white shadow ring-1 ring-black/5"><svg width="17" height="17" viewBox="0 0 24 24" strokeWidth="2" strokeLinejoin="round" className={isWished(p.id) ? "fill-red-500 stroke-red-500" : "fill-none stroke-ink/60"} aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0112 6a5.5 5.5 0 019.5 6c-2.5 4.4-9.5 9-9.5 9z" /></svg></button>
+      )}
+
 
       {/* the round photo, half above the card, in a thick white ring so it blends into the card */}
       <button type="button" aria-label={`View ${p.name}`} className={`absolute left-1/2 top-0 z-10 overflow-hidden rounded-full border-[6px] border-white bg-white shadow-lg -translate-x-1/2 -translate-y-1/2 ${compact ? "h-[5.25rem] w-[5.25rem] md:h-[5.75rem] md:w-[5.75rem]" : "h-[6.5rem] w-[6.5rem] md:h-[7.75rem] md:w-[7.75rem]"}`}>
-        <Art round src={p.image} fallback={p.fallback} kind={p.kind} color={p.color} label={p.name} className="h-full w-full transition duration-500 group-hover:scale-110" />
+        <Art round src={p.image} color={p.color} label={p.name} initialWhenMissing className="h-full w-full transition duration-500 group-hover:scale-110" />
       </button>
 
       <h4 className={`line-clamp-2 min-h-[2.4rem] leading-tight ${classic ? "font-display text-[16px] font-semibold" : "text-[14px] font-semibold"}`}>{p.name}</h4>
       <p className={`text-[11px] text-ink/55 ${classic ? "uppercase tracking-widest" : ""}`}>{p.brand}</p>
-      <p className="mt-0.5 text-[11px] leading-none text-ink/55" aria-label={rv.count ? `${rv.rating.toFixed(1)} out of 5 stars, ${rv.count} reviews` : "No reviews yet"}>{rv.count ? <><span className="text-amber-500">★</span> <b className="text-ink">{rv.rating.toFixed(1)}</b> ({rv.count})</> : "No reviews yet"}</p>
+      {featureToggles.product_reviews !== false && (
+        <p className="mt-0.5 text-[11px] leading-none text-ink/55" aria-label={rv.count ? `${rv.rating.toFixed(1)} out of 5 stars, ${rv.count} reviews` : "No reviews yet"}>{rv.count ? <><span className="text-amber-500">★</span> <b className="text-ink">{rv.rating.toFixed(1)}</b> ({rv.count})</> : "No reviews yet"}</p>
+      )}
 
       <p className="mt-1.5 flex flex-wrap items-baseline justify-center gap-x-2">
         {offer && <s className="text-[13px] text-ink/45">{money(p.mrp)}</s>}

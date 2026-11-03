@@ -183,7 +183,8 @@ export const placeOrder = ({ token, body }) => serial(async () => {
     const qty = Number(i.qty);
     if (!prod) throw new ApiFail("A product in your cart is no longer available.", 422);
     if (prod.status === "out") throw new ApiFail(`${prod.name} is out of stock. Please remove it from your cart.`, 422);
-    if (!(qty > 0) || qty > maxQty(prod)) throw new ApiFail(`Only ${maxQty(prod)} of ${prod.name} available.`, 422);
+    const maxLineQty = maxQty(prod, extras.config.maxQtyPerLine);
+    if (!(qty > 0) || qty > maxLineQty) throw new ApiFail(`Only ${maxLineQty} of ${prod.name} available.`, 422);
     if (prod.unit === "kg" ? Math.round(qty * 2) / 2 !== qty : !Number.isInteger(qty)) throw new ApiFail(`Invalid quantity for ${prod.name}.`, 422);
     return { product: prod, qty, total: lineTotal(prod, qty), subscribe: !!i.subscribe && prod.subscribable, substitution: ["brand", "remove", "call"].includes(i.substitution) ? i.substitution : "brand" };
   });
@@ -249,7 +250,7 @@ export const placeOrder = ({ token, body }) => serial(async () => {
       id: saleId, customer_id: customerId, payment_by: isCash ? 1 : 2, ...(bankId ? { bank_id: bankId } : {}), sale_date: dateDMY(), total_exact_sale_price: price,
       discount: base.subDiscount + couponOff, discount_type: "fixed", received: 0, round_amount: totals.total,
       source: "web", order_no: orderNo, order_status: "pending", payment_status: "pending",
-      delivery_address: addrLine, area_id: /^\d+$/.test(String(area.id)) ? Number(area.id) : null, delivery_type: method,
+      delivery_address: addrLine, area_id: /^\d+$/.test(String(area.id)) ? Number(area.id) : null, delivery_type: method, ...(area.optionId ? { delivery_option_id: area.optionId, delivery_city: area.city || "" } : {}),
       delivery_slot: slot ? `${slot.id}|${slot.day}|${slot.date}|${slot.label}` : null, delivery_charge: totals.delivery,
       payment_method: apiPayMethod, payment_ref: payPhone || null, coupon_code: couponCode,
       substitution_preference: JSON.stringify(meta), subscribe_flag: subscribed.length > 0, note: `${area.name}${slot ? ` · ${slot.label} (${slot.day})` : ""}`,

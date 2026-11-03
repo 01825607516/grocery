@@ -1,4 +1,4 @@
-// REAL BACKEND. Same method names / return shapes as mockApi.js.
+// OPTIONAL generic REST adapter (NOT used by the website: src/services/index.js talks to Dokani through /api/shop). Kept as a reference only.
 // When the supervisor's API is ready: set NEXT_PUBLIC_API_URL, then adjust ONLY the paths / field names in this file
 // (adapters at the top turn the server's JSON into the shapes the UI uses). Full contract: API_CONTRACT.md
 import { http } from "./http";

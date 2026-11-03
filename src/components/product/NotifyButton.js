@@ -5,15 +5,17 @@ import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { isWatching, setWatching } from "@/lib/notify";
 import { api } from "@/services";
+import { useCatalog } from "@/context/CatalogContext";
 
 // Shown only when a product is out of stock.
 export default function NotifyButton({ p }) {
   const { notify } = useCart();
   const { user, requireLogin } = useAuth();
+  const alertsEnabled = useCatalog()?.featureToggles?.back_in_stock_alerts !== false;
   const { t } = useI18n();
   const [on, setOn] = useState(false);
   useEffect(() => { setOn(isWatching(p.id)); }, [p.id]);
-  if (p.status !== "out") return null;
+  if (p.status !== "out" || !alertsEnabled) return null;
   const save = async (next) => {
     try {
       if (api.setNotify) await api.setNotify(p.id, next);

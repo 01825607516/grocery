@@ -1,9 +1,8 @@
 // ---------------------------------------------------------------------------
-// Backend switch.
-//   NEXT_PUBLIC_API_URL empty  -> MOCK mode (everything is stored in the browser, no server needed)
-//   NEXT_PUBLIC_API_URL=https://api.example.com/v1  -> real backend (see src/services/httpApi.js)
+// Where the website gets its data. There is NO mock / demo mode any more.
+//   - catalogue (products, categories, offers, recipes, delivery areas ...) -> /api/dokani/catalog (our Next.js server -> Dokani database)
+//   - shopper account, cart, wishlist, addresses, reviews, coupons, orders  -> /api/shop          (our Next.js server -> Dokani database)
+// The browser never talks to Dokani directly; the shop login stays on the server (see src/services/dokani/).
 // ---------------------------------------------------------------------------
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-export const USE_MOCK = !API_URL;
-// Real SHOPPER AUTH only (register / login / me / profile / password / logout) through our own Next.js server route (src/app/api/shop). Everything else stays on the mock.
-export const AUTH_API_URL = (process.env.NEXT_PUBLIC_AUTH_API || "").replace(/\/$/, "");
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, ""); // only used by the optional generic REST adapter (httpApi.js)
+export const AUTH_API_URL = (process.env.NEXT_PUBLIC_AUTH_API || "/api/shop").replace(/\/$/, "");
